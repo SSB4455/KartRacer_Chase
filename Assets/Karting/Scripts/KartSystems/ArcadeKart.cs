@@ -432,10 +432,11 @@ namespace KartGame.KartSystems
         }
 
         void OnCollisionEnter(Collision other)
-        {
+		{
             if(GroundLayers == (GroundLayers | (1 << other.collider.gameObject.layer)))
             {
                 lastGroundCollided = other.collider.gameObject;
+                Debug.Log(other.gameObject.name);
             }
         }
 
