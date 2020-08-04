@@ -63,8 +63,9 @@ public class ArcadeKartAgent : Agent, IInput
 
 	public override void OnActionReceived(float[] vectorAction)
 	{
+		Debug.Log(vectorAction);
 		// Actions, size = 2
-		agentInput.x = vectorAction[0];
+		agentInput.x = 0.1f;//vectorAction[0];
 		agentInput.y = vectorAction[1];
 
 		// Rewards
