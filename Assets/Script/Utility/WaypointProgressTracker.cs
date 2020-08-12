@@ -105,9 +105,10 @@ namespace UnityStandardAssets.Utility
                 // get our current progress along the route
                 progressPoint = circuit.GetRoutePoint(progressDistance);
                 Vector3 progressDelta = progressPoint.position - transform.position;
-                if (Vector3.Dot(progressDelta, progressPoint.direction) < 0)
+                if (Vector3.Dot(progressDelta, progressPoint.direction) != 0)
                 {
-                    progressDistance += progressDelta.magnitude*0.5f;
+                    progressDistance += -Math.Sign(Vector3.Dot(progressDelta, progressPoint.direction)) * Vector3.Project(progressDelta, progressPoint.direction).magnitude * 0.5f;
+                    Debug.Log(progressDistance);
                 }
 
                 lastPosition = transform.position;
@@ -146,7 +147,7 @@ namespace UnityStandardAssets.Utility
                 Gizmos.DrawLine(transform.position, target.position);
                 Gizmos.DrawWireSphere(circuit.GetRoutePosition(progressDistance), 1);
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawLine(target.position, target.position + target.forward);
+                Gizmos.DrawLine(target.position, target.position + target.forward * 3);
             }
         }
     }
