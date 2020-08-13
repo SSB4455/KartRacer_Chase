@@ -407,7 +407,7 @@ namespace UnityStandardAssets.Utility.Inspector
 				{
 					children[n++] = child;
 				}
-				Array.Sort(children, new TransformNameComparer());
+				Array.Sort(children, new TransforSiblingIndexComparer());
 				circuit.waypointList.items = new Transform[children.Length];
 				for (n = 0; n < children.Length; ++n)
 				{
@@ -449,6 +449,15 @@ namespace UnityStandardAssets.Utility.Inspector
 			public int Compare(object x, object y)
 			{
 				return ((Transform)x).name.CompareTo(((Transform)y).name);
+			}
+		}
+
+		// comparer for check distances in ray cast hits
+		public class TransforSiblingIndexComparer : IComparer
+		{
+			public int Compare(object x, object y)
+			{
+				return ((Transform)x).GetSiblingIndex().CompareTo(((Transform)y).GetSiblingIndex());
 			}
 		}
 	}
