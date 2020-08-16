@@ -121,6 +121,15 @@ namespace UnityStandardAssets.Utility
 			}
 		}
 
+		public RoutePoint GetRoutePointByDistance(float distance)
+		{
+			// position and direction
+			Vector3 p1 = GetRoutePositionByDistance(distance);
+			Vector3 p2 = GetRoutePositionByDistance(distance + 0.1f);
+			Vector3 delta = p2 - p1;
+			return new RoutePoint(p1, delta.normalized);
+		}
+
 		public Vector3 GetRoutePositionByDistance(float dist)
 		{
 			int point = 0;
@@ -177,6 +186,30 @@ namespace UnityStandardAssets.Utility
 
 				return Vector3.Lerp(points[p1n], points[p2n], i);
 			}
+		}
+
+		public float GetProgressByDistance(float distance)
+		{
+			int point = 0;
+
+			if (Length == 0)
+			{
+				Length = distances[distances.Length - 1];
+			}
+
+			distance = Mathf.Repeat(distance, Length);
+
+			while (distances[point] < distance)
+			{
+				++point;
+			}
+
+
+			// get nearest two points, ensuring points wrap-around start & end of circuit
+			p1n = ((point - 1) + numPoints) % numPoints;
+			p2n = point;
+
+			return Mathf.InverseLerp(distances[p1n], distances[p2n], distance);
 		}
 		
 
@@ -261,10 +294,10 @@ namespace UnityStandardAssets.Utility
 						prev = next;
 					}
 				}
-				for (int n = 0; n < Waypoints.Length; ++n)
+				/*for (int n = 0; n < Waypoints.Length; ++n)
 				{
 					Gizmos.DrawWireSphere(Waypoints[(n + 1) % Waypoints.Length].position, 1);
-				}
+				}*/
 			}
 		}
 

@@ -4,7 +4,7 @@ using UnityEngine;
 #pragma warning disable 649
 namespace UnityStandardAssets.Utility
 {
-	public class WaypointProgressTracker : MonoBehaviour
+	public class WaypointProgressTracker : MonoBehaviour, ICircuitRacingObserver
 	{
 		// This script can be used with any object that is supposed to follow a
 		// route marked out by waypoints.
@@ -93,12 +93,19 @@ namespace UnityStandardAssets.Utility
 					speed = Mathf.Lerp(speed, (lastPosition - transform.position).magnitude / Time.deltaTime,
 									   Time.deltaTime);
 				}
-				
+
+				//target.position = circuit.GetRoutePointByDistance(progressDistance + lookAheadForTargetOffset + lookAheadForTargetFactor * speed);
+				//target.rotation = Quaternion.LookRotation(circuit.GetRoutePointByDistance(progressDistance + lookAheadForSpeedOffset + lookAheadForSpeedFactor * speed).direction);
 
 
 				// get our current progress along the route
-				progressPoint = circuit.GetRoutePoint(transform.position);
+				progressPoint = circuit.GetRoutePointByDistance(progressDistance);
 				Vector3 progressDelta = progressPoint.position - transform.position;
+				if (Vector3.Dot(progressDelta, progressPoint.direction) != 0)
+				{
+					progressDistance += -Math.Sign(Vector3.Dot(progressDelta, progressPoint.direction)) * Vector3.Project(progressDelta, progressPoint.direction).magnitude * 0.5f;
+					//Debug.Log(progressDistance);
+				}
 
 				lastPosition = transform.position;
 			}
@@ -117,9 +124,34 @@ namespace UnityStandardAssets.Utility
 				target.rotation = circuit.Waypoints[progressNum].rotation;
 
 				// get our current progress along the route
-				progressPoint = circuit.GetRoutePoint(transform.position);
+				progressPoint = circuit.GetRoutePointByDistance(progressDistance);
 				lastPosition = transform.position;
 			}
+		}
+
+		public float GetCircuitProgress()
+		{
+			return GetCurrentLoopProgress();
+		}
+
+		public float GetCurrentLoopProgress()
+		{
+			return circuit.GetProgressByDistance(progressDistance);
+		}
+
+		public float GetCircuitLength()
+		{
+			return circuit.Length;
+		}
+
+		public Vector3 GetCircuitWayDirection(float circuitProgress)
+		{
+			return circuit.GetRoutePointByDistance(circuit.Length * circuitProgress).direction;
+		}
+
+		public int GetRank()
+		{
+			return 0;
 		}
 
 
@@ -128,10 +160,10 @@ namespace UnityStandardAssets.Utility
 			if (Application.isPlaying)
 			{
 				Gizmos.color = Color.green;
-				Gizmos.DrawLine(transform.position, target.position);
-				Gizmos.DrawWireSphere(circuit.GetRoutePosition(transform.position), 1);
+				Gizmos.DrawLine(progressPoint.position, progressPoint.position + progressPoint.direction * 3);
+				Gizmos.DrawWireSphere(progressPoint.position, 1);
 				Gizmos.color = Color.yellow;
-				Gizmos.DrawLine(target.position, target.position + target.forward * 3);
+				//Gizmos.DrawLine(target.position, target.position + target.forward * 3);
 			}
 		}
 	}

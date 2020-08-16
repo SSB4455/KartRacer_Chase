@@ -9,11 +9,13 @@ using Unity.MLAgents.Sensors;
 public class ArcadeKartAgent : Agent, IInput
 {
 	public ArcadeKart arcadeKart;
+	ICircuitRacingObserver racingObserver;
 	Vector2 agentInput = new Vector2();
 	[Tooltip("Which layers the wheels will detect.")]
 	public LayerMask GroundLayers = Physics.DefaultRaycastLayers;
 
 	GameObject lastGroundCollided = null;
+	public int targetRank;
 
 	public float hitPenalty = -0.1f;
 
@@ -32,7 +34,7 @@ public class ArcadeKartAgent : Agent, IInput
 
 	public override void OnEpisodeBegin()
 	{
-		
+		racingObserver = GetComponent<ICircuitRacingObserver>();
 	}
 
 	public override void CollectObservations(VectorSensor sensor)
@@ -55,10 +57,19 @@ public class ArcadeKartAgent : Agent, IInput
 		}
 
 		//比赛完成度 前一辆车比赛完成度 后一辆车比赛完成度
+		sensor.AddObservation(racingObserver.GetCircuitProgress());
+		sensor.AddObservation(racingObserver.GetCircuitProgress());
+		sensor.AddObservation(racingObserver.GetCircuitProgress());
 
 		//当前排名 目标排名
+		sensor.AddObservation(racingObserver.GetRank());
+		sensor.AddObservation(targetRank);
 
 		// Road forward (current 10m 20m)
+		float currentLoopProgress = racingObserver.GetCurrentLoopProgress();
+		sensor.AddObservation(racingObserver.GetCircuitWayDirection(currentLoopProgress));
+		sensor.AddObservation(racingObserver.GetCircuitWayDirection(currentLoopProgress + 10 / racingObserver.GetCircuitLength()));
+		sensor.AddObservation(racingObserver.GetCircuitWayDirection(currentLoopProgress + 20 / racingObserver.GetCircuitLength()));
 	}
 
 	public override void OnActionReceived(float[] vectorAction)
