@@ -60,4 +60,5 @@ Agent velocity|3|车辆当前的速度
 
 ## 命令
 
-mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train
+mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
+--resume
