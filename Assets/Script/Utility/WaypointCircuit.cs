@@ -10,6 +10,7 @@ namespace UnityStandardAssets.Utility
 {
 	public class WaypointCircuit : MonoBehaviour
 	{
+		public Transform trackTransform;
 		public WaypointList waypointList = new WaypointList();
 		[SerializeField] private bool smoothRoute = true;
 		private int numPoints;
@@ -439,6 +440,26 @@ namespace UnityStandardAssets.Utility.Inspector
 				foreach (Transform child in circuit.transform)
 				{
 					children[n++] = child;
+				}
+				Array.Sort(children, new TransforSiblingIndexComparer());
+				circuit.waypointList.items = new Transform[children.Length];
+				for (n = 0; n < children.Length; ++n)
+				{
+					circuit.waypointList.items[n] = children[n];
+				}
+			}
+			y += lineHeight + spacing;
+
+			// add all button
+			var addAllOnTrackTransformButtonRect = new Rect(x, y, inspectorWidth, lineHeight);
+			if (GUI.Button(addAllOnTrackTransformButtonRect, "Assign using all Track Trans child objects"))
+			{
+				var circuit = property.FindPropertyRelative("circuit").objectReferenceValue as WaypointCircuit;
+				var children = new Transform[circuit.trackTransform.childCount];
+				int n = 0;
+				for (int i = 0; i < children.Length; i++)
+				{
+					children[i] = circuit.trackTransform.GetChild(i);
 				}
 				Array.Sort(children, new TransforSiblingIndexComparer());
 				circuit.waypointList.items = new Transform[children.Length];
