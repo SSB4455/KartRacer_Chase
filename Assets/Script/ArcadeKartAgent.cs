@@ -5,6 +5,7 @@ using KartGame.KartSystems;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
+using System.Collections.Generic;
 
 public class ArcadeKartAgent : Agent, IInput
 {
@@ -35,8 +36,13 @@ public class ArcadeKartAgent : Agent, IInput
 	public override void OnEpisodeBegin()
 	{
 		racingObserver = GetComponent<ICircuitRacingObserver>();
+
+		//transform.position = racingObserver.GetStartPoint().position;
+		//transform.rotation = Quaternion.Euler(racingObserver.GetStartPoint().direction);
 	}
 
+	float lastLoopProgress;
+	float currentLoopProgress;
 	public override void CollectObservations(VectorSensor sensor)
 	{
 		// Car type
@@ -44,8 +50,6 @@ public class ArcadeKartAgent : Agent, IInput
 
 		// Agent velocity
 		sensor.AddObservation(arcadeKart.Rigidbody.velocity);
-
-		AddReward(arcadeKart.LocalSpeed() / 10f);
 
 		// Car forward
 		sensor.AddObservation(arcadeKart.transform.forward);
@@ -66,10 +70,18 @@ public class ArcadeKartAgent : Agent, IInput
 		sensor.AddObservation(targetRank);
 
 		// Road forward (current 10m 20m)
-		float currentLoopProgress = racingObserver.GetCurrentLoopProgress();
-		sensor.AddObservation(racingObserver.GetCircuitWayDirection(currentLoopProgress));
-		sensor.AddObservation(racingObserver.GetCircuitWayDirection(currentLoopProgress + 10 / racingObserver.GetCircuitLength()));
-		sensor.AddObservation(racingObserver.GetCircuitWayDirection(currentLoopProgress + 20 / racingObserver.GetCircuitLength()));
+		currentLoopProgress = racingObserver.GetCurrentLoopProgress();
+		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 0));
+		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 10));
+		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 20));
+
+		// Match finish reward
+		if (lastLoopProgress > 0.9f && currentLoopProgress < 0.1)
+		{
+			AddReward(1);
+			EndEpisode();
+		}
+		lastLoopProgress = currentLoopProgress;
 	}
 
 	public override void OnActionReceived(float[] vectorAction)
@@ -78,8 +90,9 @@ public class ArcadeKartAgent : Agent, IInput
 		agentInput.x = vectorAction[0];
 		agentInput.y = vectorAction[1];
 
-		// Rewards
-		//float distanceToTarget = Vector3.Distance(this.transform.localPosition, Target.localPosition);
+		// Reward Speed
+		AddReward(arcadeKart.LocalSpeed() / 100f);
+
 
 		// Reached target
 		//if (distanceToTarget < 1.42f)
@@ -91,6 +104,7 @@ public class ArcadeKartAgent : Agent, IInput
 		// Fell off platform
 		if (this.transform.localPosition.y < 0)
 		{
+			AddReward(-1);
 			EndEpisode();
 		}
 	}
@@ -114,6 +128,12 @@ public class ArcadeKartAgent : Agent, IInput
 		//int triggered = maskedValue & CheckpointMask;
 
 		
+	}
+
+	List<float> WayDirectionObservation(float roadProgress, float offset)
+	{
+		Vector3 direction = racingObserver.GetCircuitWayDirection(currentLoopProgress);
+		return new List<float> { offset, direction.x, direction.y, direction.z };
 	}
 
 	public Vector2 GenerateInput()
