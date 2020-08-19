@@ -295,10 +295,10 @@ namespace UnityStandardAssets.Utility
 						prev = next;
 					}
 				}
-				/*for (int n = 0; n < Waypoints.Length; ++n)
+				for (int n = 0; n < Waypoints.Length; ++n)
 				{
 					Gizmos.DrawWireSphere(Waypoints[(n + 1) % Waypoints.Length].position, 1);
-				}*/
+				}
 			}
 		}
 
