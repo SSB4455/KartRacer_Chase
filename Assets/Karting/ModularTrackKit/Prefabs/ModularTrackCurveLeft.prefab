@@ -39,7 +39,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6573238964211286484}
-  m_Mesh: {fileID: 4300002, guid: a0922edcbe6b74564b40735068507f0c, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 8a9ac4fcc9b87d34aa03354d30acaace, type: 3}
 --- !u!23 &6573238964213292826
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 6573238964213292824}
   - component: {fileID: 6573238964217589624}
   m_Layer: 11
-  m_Name: ModularTrackCurveSmall
+  m_Name: ModularTrackCurveLeft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -118,7 +118,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6573238964211286492}
-  m_Mesh: {fileID: 4300000, guid: a0922edcbe6b74564b40735068507f0c, type: 3}
+  m_Mesh: {fileID: 4300002, guid: 8a9ac4fcc9b87d34aa03354d30acaace, type: 3}
 --- !u!23 &6573238964213292824
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -169,4 +169,4 @@ MeshCollider:
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
-  m_Mesh: {fileID: 4300000, guid: a0922edcbe6b74564b40735068507f0c, type: 3}
+  m_Mesh: {fileID: 4300002, guid: 8a9ac4fcc9b87d34aa03354d30acaace, type: 3}
