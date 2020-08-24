@@ -43,12 +43,14 @@ namespace UnityStandardAssets.Utility
 		public WaypointCircuit.RoutePoint speedPoint { get; private set; }
 		public WaypointCircuit.RoutePoint progressPoint { get; private set; }
 
-		public Transform target;
+		Transform target;
 
 		private float progressDistance; // The progress round the route, used in smooth mode.
 		private int progressNum; // the current waypoint number, used in point-to-point mode.
 		private Vector3 lastPosition; // Used to calculate current speed (since we may not have a rigidbody component)
 		private float speed; // current speed of this object (calculated from delta since last frame)
+
+
 
 		// setup script properties
 		private void Start()
@@ -75,58 +77,24 @@ namespace UnityStandardAssets.Utility
 			progressNum = 0;
 			if (progressStyle == ProgressStyle.PointToPoint)
 			{
-				target.position = circuit.Waypoints[progressNum].position;
-				target.rotation = circuit.Waypoints[progressNum].rotation;
+				target.position = GetStartPointPosition();
+				target.rotation = GetStartPointRotation();
 			}
 		}
 
+		public Vector3 GetStartPointPosition()
+		{
+			return circuit.WayCheckPoints[0].position + new Vector3(0, 1, 0);
+		}
+
+		public Quaternion GetStartPointRotation()
+		{
+			return Quaternion.Euler(circuit.GetRoutePointByProgress(0).direction);
+		}
 
 		private void Update()
 		{
-			if (progressStyle == ProgressStyle.SmoothAlongRoute)
-			{
-				// determine the position we should currently be aiming for
-				// (this is different to the current progress position, it is a a certain amount ahead along the route)
-				// we use lerp as a simple way of smoothing out the speed over time.
-				if (Time.deltaTime > 0)
-				{
-					speed = Mathf.Lerp(speed, (lastPosition - transform.position).magnitude / Time.deltaTime,
-									   Time.deltaTime);
-				}
-
-				//target.position = circuit.GetRoutePointByDistance(progressDistance + lookAheadForTargetOffset + lookAheadForTargetFactor * speed);
-				//target.rotation = Quaternion.LookRotation(circuit.GetRoutePointByDistance(progressDistance + lookAheadForSpeedOffset + lookAheadForSpeedFactor * speed).direction);
-
-
-				// get our current progress along the route
-				progressPoint = circuit.GetRoutePointByDistance(progressDistance);
-				Vector3 progressDelta = progressPoint.position - transform.position;
-				if (Vector3.Dot(progressDelta, progressPoint.direction) != 0)
-				{
-					progressDistance += -Math.Sign(Vector3.Dot(progressDelta, progressPoint.direction)) * Vector3.Project(progressDelta, progressPoint.direction).magnitude * 0.5f;
-					//Debug.Log(progressDistance);
-				}
-
-				lastPosition = transform.position;
-			}
-			else
-			{
-				// point to point mode. Just increase the waypoint if we're close enough:
-
-				Vector3 targetDelta = target.position - transform.position;
-				if (targetDelta.magnitude < pointToPointThreshold)
-				{
-					progressNum = (progressNum + 1) % circuit.Waypoints.Length;
-				}
-
-
-				target.position = circuit.Waypoints[progressNum].position;
-				target.rotation = circuit.Waypoints[progressNum].rotation;
-
-				// get our current progress along the route
-				progressPoint = circuit.GetRoutePointByDistance(progressDistance);
-				lastPosition = transform.position;
-			}
+			
 		}
 
 		public float GetCircuitProgress()
@@ -136,17 +104,17 @@ namespace UnityStandardAssets.Utility
 
 		public float GetCurrentLoopProgress()
 		{
-			return circuit.GetProgressByDistance(progressDistance);
+			return circuit.GetInWayProgress(transform.position);
 		}
 
 		public float GetCircuitLength()
 		{
-			return circuit.Length;
+			return circuit.CircuitLength;
 		}
 
 		public Vector3 GetCircuitWayDirection(float circuitProgress)
 		{
-			return circuit.GetRoutePointByDistance(circuit.Length * circuitProgress).direction;
+			return circuit.GetRoutePointByProgress(circuitProgress).direction;
 		}
 
 		public int GetRank()
@@ -160,8 +128,8 @@ namespace UnityStandardAssets.Utility
 			if (Application.isPlaying)
 			{
 				Gizmos.color = Color.green;
-				Gizmos.DrawLine(progressPoint.position, progressPoint.position + progressPoint.direction * 3);
 				Gizmos.DrawWireSphere(progressPoint.position, 1);
+				Gizmos.DrawLine(progressPoint.position, progressPoint.position + progressPoint.direction * 3);
 				Gizmos.color = Color.yellow;
 				//Gizmos.DrawLine(target.position, target.position + target.forward * 3);
 			}

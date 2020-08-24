@@ -37,8 +37,10 @@ public class ArcadeKartAgent : Agent, IInput
 	{
 		racingObserver = GetComponent<ICircuitRacingObserver>();
 
-		//transform.position = racingObserver.GetStartPoint().position;
-		//transform.rotation = Quaternion.Euler(racingObserver.GetStartPoint().direction);
+		transform.position = racingObserver.GetStartPointPosition();
+		transform.rotation = racingObserver.GetStartPointRotation();
+
+		arcadeKart.Rigidbody.velocity = Vector3.zero;
 	}
 
 	float lastLoopProgress;
@@ -132,7 +134,7 @@ public class ArcadeKartAgent : Agent, IInput
 
 	List<float> WayDirectionObservation(float roadProgress, float offset)
 	{
-		Vector3 direction = racingObserver.GetCircuitWayDirection(currentLoopProgress);
+		Vector3 direction = racingObserver.GetCircuitWayDirection(roadProgress + (offset / racingObserver.GetCircuitLength()));
 		return new List<float> { offset, direction.x, direction.y, direction.z };
 	}
 

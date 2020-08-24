@@ -41,6 +41,7 @@ public class ArcadeKartRaycastSensor : MonoBehaviour
 	public bool ShowRaycasts;
 #endregion
 
+	RaycastHit hitInfo;
 	float hitDistance;
 
 
@@ -50,16 +51,19 @@ public class ArcadeKartRaycastSensor : MonoBehaviour
 		if (ShowRaycasts)
 		{
 			Debug.DrawRay(Trans.position, Trans.forward * raycastDistance, Color.green);
-			Debug.DrawRay(Trans.position, Trans.forward * carEdge, Color.red);
+			Debug.DrawRay(Trans.position, Trans.forward * carEdge, Color.gray);
+			if (hitInfo.distance != 0 && hitInfo.distance < raycastDistance)
+			{
+				Debug.DrawRay(Trans.position, Trans.forward * hitInfo.distance, Color.red);
+			}
 			//Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, material, 0);
 		}
 	}
 
 	public List<float> GetObservationV1()
 	{
-		bool hit = Physics.Raycast(Trans.position, Trans.forward, out RaycastHit hitInfo,
-			raycastDistance, mask, QueryTriggerInteraction.Ignore);
-		float hitDistance = hit ? hitInfo.distance : raycastDistance;
+		bool hit = Physics.Raycast(Trans.position, Trans.forward, out hitInfo, raycastDistance, mask, QueryTriggerInteraction.Ignore);
+		hitDistance = hit ? hitInfo.distance : raycastDistance;
 		List<float> sensorRaycastInfoList = new List<float>();
 
 		// 检测器指向角度

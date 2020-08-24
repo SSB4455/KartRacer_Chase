@@ -13,6 +13,8 @@ public interface ICircuitRacingObserver
 	float GetCircuitProgress();
 	float GetCurrentLoopProgress();
 	float GetCircuitLength();
+	Vector3 GetStartPointPosition();
+	Quaternion GetStartPointRotation();
 	Vector3 GetCircuitWayDirection(float circuitProgress);
 	int GetRank();
 }

@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
-
 #endif
 
 namespace UnityStandardAssets.Utility
@@ -11,209 +11,72 @@ namespace UnityStandardAssets.Utility
 	public class WaypointCircuit : MonoBehaviour
 	{
 		public Transform trackTransform;
-		public WaypointList waypointList = new WaypointList();
 		[SerializeField] private bool smoothRoute = true;
-		private int numPoints;
-		private Vector3[] points;
-		private float[] distances;
+		[SerializeField] private int substeps = 10;
 
-		public float editorVisualisationSubsteps = 100;
-		public float Length { get; private set; }
+		public Transform[] WayCheckPoints { get; set; }
+		private Vector3[] inWayPoints;
+		private Vector3[] inWayPointDirections;
+		internal int InwayPointsCount { get; private set; }
+		internal float CircuitLength { get; private set; }
 
-		public Transform[] Waypoints
-		{
-			get { return waypointList.items; }
-		}
 
-		//this being here will save GC allocs
-		private int p0n;
-		private int p1n;
-		private int p2n;
-		private int p3n;
-
-		private float i;
-		private Vector3 P0;
-		private Vector3 P1;
-		private Vector3 P2;
-		private Vector3 P3;
 
 		// Use this for initialization
 		private void Awake()
 		{
-			if (Waypoints.Length > 1)
+			if (WayCheckPoints.Length > 1)
 			{
 				CachePositionsAndDistances();
 			}
-			numPoints = Waypoints.Length;
 		}
-
 
 		public RoutePoint GetRoutePoint(Vector3 carPos)
 		{
 			// position and direction
-			Vector3 p1 = GetRoutePosition(carPos);
-			//Vector3 p2 = GetRoutePosition(dist + 0.1f);
-			//Vector3 delta = p2 - p1;
-			return new RoutePoint(p1, p1.normalized);
+			int inWayPointIndex = GetInWayPointIndex(carPos);
+			return new RoutePoint(inWayPoints[inWayPointIndex], inWayPointDirections[inWayPointIndex]);
 		}
 
-
-		public Vector3 GetRoutePosition(Vector3 carPos)
+		Vector3 cacheLastPosition;
+		int cachePointIndex;
+		public int GetInWayPointIndex(Vector3 position)
 		{
-			int nearPointIndex = 0;
-			int[] nearPosition2 = new int[2];
-			float twoPointDistance = -1;
-			for (int i = 1; i < points.Length; i++)
+			if (cacheLastPosition == position)
 			{
-				float twoPointDistance2 = Vector3.Distance(points[i - 1], carPos) + Vector3.Distance(points[i], carPos);
-				if (twoPointDistance < 0 || twoPointDistance2 < twoPointDistance)
+				return cachePointIndex;
+			}
+			int inWayPointIndex = 0;
+			if (smoothRoute)
+			{
+				float distance = -1, distance2 = -1;
+				for (int i = 0; i < inWayPoints.Length - 1; i++)
 				{
-					twoPointDistance = twoPointDistance2;
-					nearPointIndex = i;
+					distance2 = Vector3.Distance(inWayPoints[i], position);
+					if (distance < 0 || distance2 < distance)
+					{
+						distance = distance2;
+						inWayPointIndex = i;
+					}
 				}
 			}
 
-			// get nearest two points, ensuring points wrap-around start & end of circuit
-			p1n = ((nearPointIndex - 1) + numPoints) % numPoints;
-			p2n = nearPointIndex;
-
-			// found point numbers, now find interpolation value between the two middle points
-			float progressDist = Vector3.Project(points[p1n] - carPos, (points[p2n] - points[p1n]).normalized).magnitude;
-			//Debug.Log("progressDist = " + progressDist);
-			if (distances[p1n] + progressDist > distances[p2n])
-			{
-				nearPointIndex++;
-				p1n = ((nearPointIndex - 1) + numPoints) % numPoints;
-				p2n = nearPointIndex;
-				progressDist = Vector3.Project(points[p1n] - carPos, (points[p2n] - points[p1n]).normalized).magnitude;
-			}
-			i = Mathf.InverseLerp(distances[p1n], distances[p2n], distances[p1n] + progressDist);
-
-			if (smoothRoute)
-			{
-				// smooth catmull-rom calculation between the two relevant points
-
-
-				// get indices for the surrounding 2 points, because
-				// four points are required by the catmull-rom function
-				p0n = ((nearPointIndex - 2) + numPoints) % numPoints;
-				p3n = (nearPointIndex + 1) % numPoints;
-
-				// 2nd point may have been the 'last' point - a dupe of the first,
-				// (to give a value of max track distance instead of zero)
-				// but now it must be wrapped back to zero if that was the case.
-				p2n = p2n % numPoints;
-
-				P0 = points[p0n];
-				P1 = points[p1n];
-				P2 = points[p2n];
-				P3 = points[p3n];
-
-				return CatmullRom(P0, P1, P2, P3, i);
-			}
-			else
-			{
-				// simple linear lerp between the two points:
-
-				p1n = ((nearPointIndex - 1) + numPoints) % numPoints;
-				p2n = nearPointIndex;
-
-				return Vector3.Lerp(points[p1n], points[p2n], i);
-			}
+			cacheLastPosition = position;
+			cachePointIndex = inWayPointIndex;
+			return inWayPointIndex;
 		}
 
-		public RoutePoint GetRoutePointByDistance(float distance)
+		public float GetInWayProgress(Vector3 position)
 		{
-			// position and direction
-			Vector3 p1 = GetRoutePositionByDistance(distance);
-			Vector3 p2 = GetRoutePositionByDistance(distance + 0.1f);
-			Vector3 delta = p2 - p1;
-			return new RoutePoint(p1, delta.normalized);
+			float inWayPointIndex = GetInWayPointIndex(position);
+			return inWayPointIndex / InwayPointsCount;
 		}
 
-		public Vector3 GetRoutePositionByDistance(float dist)
+		public RoutePoint GetRoutePointByProgress(float progress)
 		{
-			int point = 0;
-
-			if (Length == 0)
-			{
-				Length = distances[distances.Length - 1];
-			}
-
-			dist = Mathf.Repeat(dist, Length);
-
-			while (distances[point] < dist)
-			{
-				++point;
-			}
-
-
-			// get nearest two points, ensuring points wrap-around start & end of circuit
-			p1n = ((point - 1) + numPoints) % numPoints;
-			p2n = point;
-
-			// found point numbers, now find interpolation value between the two middle points
-
-			i = Mathf.InverseLerp(distances[p1n], distances[p2n], dist);
-
-			if (smoothRoute)
-			{
-				// smooth catmull-rom calculation between the two relevant points
-
-
-				// get indices for the surrounding 2 points, because
-				// four points are required by the catmull-rom function
-				p0n = ((point - 2) + numPoints) % numPoints;
-				p3n = (point + 1) % numPoints;
-
-				// 2nd point may have been the 'last' point - a dupe of the first,
-				// (to give a value of max track distance instead of zero)
-				// but now it must be wrapped back to zero if that was the case.
-				p2n = p2n % numPoints;
-
-				P0 = points[p0n];
-				P1 = points[p1n];
-				P2 = points[p2n];
-				P3 = points[p3n];
-
-				return CatmullRom(P0, P1, P2, P3, i);
-			}
-			else
-			{
-				// simple linear lerp between the two points:
-
-				p1n = ((point - 1) + numPoints) % numPoints;
-				p2n = point;
-
-				return Vector3.Lerp(points[p1n], points[p2n], i);
-			}
+			int inWayPointIndex = (int)(progress * InwayPointsCount) % InwayPointsCount;
+			return new RoutePoint(inWayPoints[inWayPointIndex], inWayPointDirections[inWayPointIndex]);
 		}
-
-		public float GetProgressByDistance(float distance)
-		{
-			int point = 0;
-
-			if (Length == 0)
-			{
-				Length = distances[distances.Length - 1];
-			}
-
-			distance = Mathf.Repeat(distance, Length);
-
-			while (distances[point] < distance)
-			{
-				++point;
-			}
-
-
-			// get nearest two points, ensuring points wrap-around start & end of circuit
-			p1n = ((point - 1) + numPoints) % numPoints;
-			p2n = point;
-
-			return Mathf.InverseLerp(distances[p1n], distances[p2n], distance);
-		}
-		
-
 
 		private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float i)
 		{
@@ -224,96 +87,109 @@ namespace UnityStandardAssets.Utility
 					(-p0 + 3 * p1 - 3 * p2 + p3) * i * i * i);
 		}
 
-
 		private void CachePositionsAndDistances()
 		{
-			// transfer the position of each point and distances between points to arrays for
-			// speed of lookup at runtime
-			points = new Vector3[Waypoints.Length + 1];
-			distances = new float[Waypoints.Length + 1];
-
-			float accumulateDistance = 0;
-			for (int i = 0; i < points.Length; ++i)
+			//去除空的点
+			List<Transform> wayPoint2List = new List<Transform>();
+			for (int i = 0; i < WayCheckPoints.Length; i++)
 			{
-				var t1 = Waypoints[(i) % Waypoints.Length];
-				var t2 = Waypoints[(i + 1) % Waypoints.Length];
-				if (t1 != null && t2 != null)
+				if (WayCheckPoints[i] != null)
 				{
-					Vector3 p1 = t1.position;
-					Vector3 p2 = t2.position;
-					points[i] = Waypoints[i % Waypoints.Length].position;
-					distances[i] = accumulateDistance;
-					accumulateDistance += (p1 - p2).magnitude;
+					wayPoint2List.Add(WayCheckPoints[i]);
 				}
 			}
+			WayCheckPoints = wayPoint2List.ToArray();
+			int checkPointNum = WayCheckPoints.Length;
+
+			// transfer the position of each point and distances between points to arrays for
+			// speed of lookup at runtime
+			List<Vector3> inWayPointList = new List<Vector3>();
+			List<Vector3> inWayPointDirectionList = new List<Vector3>();
+
+			for (int i = 0; i < WayCheckPoints.Length; ++i)
+			{
+				var t1 = WayCheckPoints[(i) % WayCheckPoints.Length];
+				var t2 = WayCheckPoints[(i + 1) % WayCheckPoints.Length];
+				float distance = (t1.position - t2.position).magnitude;
+
+				// get indices for the surrounding four points
+				// two points(1, 2) are required by the linear lerp function
+				// four points are required by the catmull-rom function
+				int p0n = ((i - 2) + checkPointNum) % checkPointNum;
+				int p1n = ((i - 1) + checkPointNum) % checkPointNum;
+				int p2n = i % checkPointNum;
+				int p3n = (i + 1) % checkPointNum;
+
+				Vector3 p0 = WayCheckPoints[p0n].position;
+				Vector3 p1 = WayCheckPoints[p1n].position;
+				Vector3 p2 = WayCheckPoints[p2n].position;
+				Vector3 p3 = WayCheckPoints[p3n].position;
+				Vector3 inWayPoint;
+				for (float dist = 0; dist < distance; dist += distance / substeps)
+				{
+					// found point numbers, now find interpolation value between the two middle points
+					float distProgress = Mathf.InverseLerp(0, distance, dist);
+
+					if (smoothRoute)
+					{
+						// smooth catmull-rom calculation between the two relevant points
+						inWayPoint = CatmullRom(p0, p1, p2, p3, distProgress);
+					} else {
+						// simple linear lerp between the two points:
+						inWayPoint = Vector3.Lerp(WayCheckPoints[p1n].position, WayCheckPoints[p2n].position, distProgress);
+					}
+					inWayPointList.Add(inWayPoint);
+				}
+			}
+			inWayPointList.Add(inWayPointList[0]);
+			CircuitLength = 0;
+			for (int i = 0; i < inWayPointList.Count; i++)
+			{
+				inWayPointDirectionList.Add((inWayPointList[i] - inWayPointList[(i + 1) % inWayPointList.Count]).normalized);
+				CircuitLength += Vector3.Distance(inWayPointList[i], inWayPointList[(i + 1) % inWayPointList.Count]);
+			}
+			inWayPoints = inWayPointList.ToArray();
+			inWayPointDirections = inWayPointDirectionList.ToArray();
+			InwayPointsCount = inWayPointList.Count;
 		}
 
 
 		private void OnDrawGizmos()
 		{
 			DrawGizmos(false);
-
-			//Gizmos.DrawWireSphere(points[p1n], 1);
-			//Gizmos.DrawWireSphere(points[p2n], 1);
 		}
-
 
 		private void OnDrawGizmosSelected()
 		{
 			DrawGizmos(true);
 		}
 
-
 		private void DrawGizmos(bool selected)
 		{
-			waypointList.circuit = this;
-			if (Waypoints.Length > 1)
+			CachePositionsAndDistances();
+			Gizmos.color = selected ? Color.yellow : new Color(1, 1, 0, 0.5f);
+			Vector3 prev = inWayPoints[0];
+			for (int i = 1; i < inWayPoints.Length; i++)
 			{
-				numPoints = Waypoints.Length;
-
-				CachePositionsAndDistances();
-				Length = distances[distances.Length - 1];
-
-				Gizmos.color = selected ? Color.yellow : new Color(1, 1, 0, 0.5f);
-				Vector3 prev = Waypoints[0].position;
-				if (smoothRoute)
-				{
-					for (float dist = 0; dist < Length; dist += Length / editorVisualisationSubsteps)
-					{
-						Vector3 next = GetRoutePositionByDistance(dist + 1);
-						Gizmos.DrawLine(prev, next);
-						prev = next;
-					}
-					Gizmos.DrawLine(prev, Waypoints[0].position);
-				}
-				else
-				{
-					for (int n = 0; n < Waypoints.Length; ++n)
-					{
-						Vector3 next = Waypoints[(n + 1) % Waypoints.Length].position;
-						Gizmos.DrawLine(prev, next);
-						prev = next;
-					}
-				}
-				for (int n = 0; n < Waypoints.Length; ++n)
-				{
-					Gizmos.DrawWireSphere(Waypoints[(n + 1) % Waypoints.Length].position, 1);
-				}
+				Vector3 next = inWayPoints[i];
+				Gizmos.DrawLine(prev, next);
+				Gizmos.DrawWireSphere(prev, 0.5f);
+				prev = next;
+			}
+			Gizmos.DrawLine(prev, WayCheckPoints[0].position);
+		
+			for (int n = 0; n < WayCheckPoints?.Length; ++n)
+			{
+				Gizmos.DrawWireSphere(WayCheckPoints[(n + 1) % WayCheckPoints.Length].position, 1);
 			}
 		}
 
-
-		[Serializable]
-		public class WaypointList
-		{
-			public WaypointCircuit circuit;
-			public Transform[] items = new Transform[0];
-		}
 
 		public struct RoutePoint
 		{
 			public Vector3 position;
 			public Vector3 direction;
+
 
 
 			public RoutePoint(Vector3 position, Vector3 direction)
@@ -328,7 +204,7 @@ namespace UnityStandardAssets.Utility
 namespace UnityStandardAssets.Utility.Inspector
 {
 #if UNITY_EDITOR
-	[CustomPropertyDrawer(typeof(WaypointCircuit.WaypointList))]
+	[CustomPropertyDrawer(typeof(WaypointCircuit))]
 	public class WaypointListDrawer : PropertyDrawer
 	{
 		private float lineHeight = 18;
@@ -360,7 +236,7 @@ namespace UnityStandardAssets.Utility.Inspector
 			{
 				for (int i = -1; i < items.arraySize; ++i)
 				{
-					var item = items.GetArrayElementAtIndex(i);
+					var item = items.GetArrayElementAtIndex(i > 0 ? i : 0);
 
 					float rowX = x;
 					for (int n = 0; n < props.Length; ++n)
@@ -442,10 +318,10 @@ namespace UnityStandardAssets.Utility.Inspector
 					children[n++] = child;
 				}
 				Array.Sort(children, new TransforSiblingIndexComparer());
-				circuit.waypointList.items = new Transform[children.Length];
+				circuit.WayCheckPoints = new Transform[children.Length];
 				for (n = 0; n < children.Length; ++n)
 				{
-					circuit.waypointList.items[n] = children[n];
+					circuit.WayCheckPoints[n] = children[n];
 				}
 			}
 			y += lineHeight + spacing;
@@ -462,10 +338,10 @@ namespace UnityStandardAssets.Utility.Inspector
 					children[i] = circuit.trackTransform.GetChild(i);
 				}
 				Array.Sort(children, new TransforSiblingIndexComparer());
-				circuit.waypointList.items = new Transform[children.Length];
+				circuit.WayCheckPoints = new Transform[children.Length];
 				for (n = 0; n < children.Length; ++n)
 				{
-					circuit.waypointList.items[n] = children[n];
+					circuit.WayCheckPoints[n] = children[n];
 				}
 			}
 			y += lineHeight + spacing;
@@ -476,7 +352,7 @@ namespace UnityStandardAssets.Utility.Inspector
 			{
 				var circuit = property.FindPropertyRelative("circuit").objectReferenceValue as WaypointCircuit;
 				int n = 0;
-				foreach (Transform child in circuit.waypointList.items)
+				foreach (Transform child in circuit.WayCheckPoints)
 				{
 					child.name = "Waypoint " + (n++).ToString("000");
 				}
