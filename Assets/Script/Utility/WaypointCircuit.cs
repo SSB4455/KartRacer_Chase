@@ -91,7 +91,7 @@ namespace UnityStandardAssets.Utility
 		{
 			//去除空的点
 			List<Transform> wayPoint2List = new List<Transform>();
-			for (int i = 0; i < WayCheckPoints.Length; i++)
+			for (int i = 0; i < WayCheckPoints?.Length; i++)
 			{
 				if (WayCheckPoints[i] != null)
 				{
@@ -141,7 +141,10 @@ namespace UnityStandardAssets.Utility
 					inWayPointList.Add(inWayPoint);
 				}
 			}
-			inWayPointList.Add(inWayPointList[0]);
+			if (inWayPointList.Count > 0)
+			{
+				inWayPointList.Add(inWayPointList[0]);
+			}
 			CircuitLength = 0;
 			for (int i = 0; i < inWayPointList.Count; i++)
 			{
@@ -168,15 +171,14 @@ namespace UnityStandardAssets.Utility
 		{
 			CachePositionsAndDistances();
 			Gizmos.color = selected ? Color.yellow : new Color(1, 1, 0, 0.5f);
-			Vector3 prev = inWayPoints[0];
-			for (int i = 1; i < inWayPoints.Length; i++)
+			Vector3 prev = inWayPoints?.Length > 0 ? inWayPoints[0] : Vector3.zero;
+			for (int i = 1; i < inWayPoints?.Length; i++)
 			{
 				Vector3 next = inWayPoints[i];
 				Gizmos.DrawLine(prev, next);
 				Gizmos.DrawWireSphere(prev, 0.5f);
 				prev = next;
 			}
-			Gizmos.DrawLine(prev, WayCheckPoints[0].position);
 		
 			for (int n = 0; n < WayCheckPoints?.Length; ++n)
 			{
@@ -205,7 +207,7 @@ namespace UnityStandardAssets.Utility.Inspector
 {
 #if UNITY_EDITOR
 	[CustomPropertyDrawer(typeof(WaypointCircuit))]
-	public class WaypointListDrawer : PropertyDrawer
+	public class WaypointCircuitDrawer : PropertyDrawer
 	{
 		private float lineHeight = 18;
 		private float spacing = 4;
@@ -226,7 +228,7 @@ namespace UnityStandardAssets.Utility.Inspector
 			var indent = EditorGUI.indentLevel;
 			EditorGUI.indentLevel = 0;
 
-			var items = property.FindPropertyRelative("items");
+			var items = property.FindPropertyRelative("wayCheckPoints");
 			var titles = new string[] { "Transform", "", "", "" };
 			var props = new string[] { "transform", "^", "v", "-" };
 			var widths = new float[] { .7f, .1f, .1f, .1f };
