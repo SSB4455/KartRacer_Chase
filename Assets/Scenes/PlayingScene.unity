@@ -706,7 +706,7 @@ PrefabInstance:
     - target: {fileID: 4391989889372898310, guid: 419b6cd587a53ba4c87a957021017bad,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -140
       objectReference: {fileID: 0}
     - target: {fileID: 4391989889372898310, guid: 419b6cd587a53ba4c87a957021017bad,
         type: 3}
@@ -906,32 +906,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trackTransform: {fileID: 128277466}
-  waypointList:
-    circuit: {fileID: 128277468}
-    items:
-    - {fileID: 128277465}
-    - {fileID: 128277464}
-    - {fileID: 128277463}
-    - {fileID: 128277462}
-    - {fileID: 128277461}
-    - {fileID: 128277460}
-    - {fileID: 128277459}
-    - {fileID: 128277467}
-    - {fileID: 128277457}
-    - {fileID: 128277456}
-    - {fileID: 128277455}
-    - {fileID: 128277454}
-    - {fileID: 128277453}
-    - {fileID: 128277452}
-    - {fileID: 128277451}
-    - {fileID: 128277450}
-    - {fileID: 128277449}
-    - {fileID: 128277458}
-    - {fileID: 128277447}
-    - {fileID: 128277446}
-    - {fileID: 128277445}
   smoothRoute: 1
-  editorVisualisationSubsteps: 100
+  substeps: 10
+  wayCheckPoints:
+  - {fileID: 128277465}
+  - {fileID: 128277464}
+  - {fileID: 128277463}
+  - {fileID: 128277462}
+  - {fileID: 128277461}
+  - {fileID: 128277460}
+  - {fileID: 128277459}
+  - {fileID: 128277467}
+  - {fileID: 128277457}
+  - {fileID: 128277456}
+  - {fileID: 128277455}
+  - {fileID: 128277454}
+  - {fileID: 128277453}
+  - {fileID: 128277452}
+  - {fileID: 128277451}
+  - {fileID: 128277450}
+  - {fileID: 128277449}
+  - {fileID: 128277458}
+  - {fileID: 128277447}
+  - {fileID: 128277446}
+  - {fileID: 128277445}
 --- !u!4 &160538360
 Transform:
   m_ObjectHideFlags: 0
@@ -1542,7 +1540,6 @@ MonoBehaviour:
   lookAheadForSpeedFactor: 0.2
   progressStyle: 0
   pointToPointThreshold: 4
-  target: {fileID: 0}
 --- !u!114 &292147245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4571,7 +4568,7 @@ PrefabInstance:
     - target: {fileID: 8232701352056223283, guid: 3bea81580d1bbb649ab2cb61592e9dc6,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 40
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8232701352056223283, guid: 3bea81580d1bbb649ab2cb61592e9dc6,
         type: 3}
@@ -4581,7 +4578,7 @@ PrefabInstance:
     - target: {fileID: 8232701352056223283, guid: 3bea81580d1bbb649ab2cb61592e9dc6,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -60
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8232701352056223283, guid: 3bea81580d1bbb649ab2cb61592e9dc6,
         type: 3}
@@ -4806,37 +4803,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trackTransform: {fileID: 852842273}
-  waypointList:
-    circuit: {fileID: 852842274}
-    items:
-    - {fileID: 852842272}
-    - {fileID: 852842271}
-    - {fileID: 852842270}
-    - {fileID: 852842269}
-    - {fileID: 852842268}
-    - {fileID: 852842267}
-    - {fileID: 852842266}
-    - {fileID: 852842265}
-    - {fileID: 852842264}
-    - {fileID: 852842263}
-    - {fileID: 852842262}
-    - {fileID: 852842261}
-    - {fileID: 852842260}
-    - {fileID: 852842259}
-    - {fileID: 852842258}
-    - {fileID: 852842257}
-    - {fileID: 852842256}
-    - {fileID: 852842255}
-    - {fileID: 852842254}
-    - {fileID: 852842253}
-    - {fileID: 852842252}
-    - {fileID: 852842251}
-    - {fileID: 852842250}
-    - {fileID: 852842249}
-    - {fileID: 852842248}
-    - {fileID: 852842247}
   smoothRoute: 1
-  editorVisualisationSubsteps: 100
+  substeps: 10
+  wayCheckPoints:
+  - {fileID: 852842272}
+  - {fileID: 852842271}
+  - {fileID: 852842270}
+  - {fileID: 852842269}
+  - {fileID: 852842268}
+  - {fileID: 852842267}
+  - {fileID: 852842266}
+  - {fileID: 852842265}
+  - {fileID: 852842264}
+  - {fileID: 852842263}
+  - {fileID: 852842262}
+  - {fileID: 852842261}
+  - {fileID: 852842260}
+  - {fileID: 852842259}
+  - {fileID: 852842258}
+  - {fileID: 852842257}
+  - {fileID: 852842256}
+  - {fileID: 852842255}
+  - {fileID: 852842254}
+  - {fileID: 852842253}
+  - {fileID: 852842252}
+  - {fileID: 852842251}
+  - {fileID: 852842250}
+  - {fileID: 852842249}
+  - {fileID: 852842248}
+  - {fileID: 852842247}
 --- !u!1 &883753793
 GameObject:
   m_ObjectHideFlags: 0
@@ -5099,14 +5094,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e568c6eaef6692741bae778be193aa7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  circuit: {fileID: 128277468}
+  circuit: {fileID: 852842274}
   lookAheadForTargetOffset: 5
   lookAheadForTargetFactor: 0.1
   lookAheadForSpeedOffset: 10
   lookAheadForSpeedFactor: 0.2
   progressStyle: 0
   pointToPointThreshold: 4
-  target: {fileID: 0}
 --- !u!33 &940379950
 MeshFilter:
   m_ObjectHideFlags: 0

@@ -94,7 +94,7 @@ namespace UnityStandardAssets.Utility
 
 		private void Update()
 		{
-			
+			//GetCurrentLoopProgress();
 		}
 
 		public float GetCircuitProgress()
@@ -104,7 +104,9 @@ namespace UnityStandardAssets.Utility
 
 		public float GetCurrentLoopProgress()
 		{
-			return circuit.GetInWayProgress(transform.position);
+			progressPoint = circuit.GetRoutePoint(transform.position);
+			//progressPoint = circuit.GetRoutePointByProgress(progressPoint.percent + 0.1f);
+			return progressPoint.percent;
 		}
 
 		public float GetCircuitLength()

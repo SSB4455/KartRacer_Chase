@@ -60,5 +60,7 @@ Agent velocity|3|车辆当前的速度
 
 ## 命令
 
+cd ml-agents_config
+activate ml-agents_release2
 mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
 --resume

@@ -14,10 +14,11 @@ namespace UnityStandardAssets.Utility
 		[SerializeField] private bool smoothRoute = true;
 		[SerializeField] private int substeps = 10;
 
-		public Transform[] WayCheckPoints { get; set; }
-		private Vector3[] inWayPoints;
-		private Vector3[] inWayPointDirections;
-		internal int InwayPointsCount { get; private set; }
+		[SerializeField] Transform[] wayCheckPoints;
+		internal Transform[] WayCheckPoints { get { return wayCheckPoints; } set { wayCheckPoints = value; } }
+		private RoutePoint[] inWayPoints;
+		internal int InwayPointsCount { get { return inWayPoints.Length; } }
+		[SerializeField] int[] optimizedIndices;
 		internal float CircuitLength { get; private set; }
 
 
@@ -25,57 +26,140 @@ namespace UnityStandardAssets.Utility
 		// Use this for initialization
 		private void Awake()
 		{
-			if (WayCheckPoints.Length > 1)
+			if (WayCheckPoints?.Length > 1)
 			{
 				CachePositionsAndDistances();
 			}
 		}
 
-		public RoutePoint GetRoutePoint(Vector3 carPos)
-		{
-			// position and direction
-			int inWayPointIndex = GetInWayPointIndex(carPos);
-			return new RoutePoint(inWayPoints[inWayPointIndex], inWayPointDirections[inWayPointIndex]);
-		}
-
 		Vector3 cacheLastPosition;
-		int cachePointIndex;
-		public int GetInWayPointIndex(Vector3 position)
+		RoutePoint cacheRoutePoint;
+		public RoutePoint GetRoutePoint(Vector3 position)
 		{
+			RoutePoint result = new RoutePoint();
 			if (cacheLastPosition == position)
 			{
-				return cachePointIndex;
+				return cacheRoutePoint;
 			}
-			int inWayPointIndex = 0;
+
+			cacheLastPosition = position;
 			if (smoothRoute)
 			{
-				float distance = -1, distance2 = -1;
-				for (int i = 0; i < inWayPoints.Length - 1; i++)
+				//First make a very rough sample of the from-to region 
+				int steps = (wayCheckPoints.Length - 1) * 6; //Sampling six points per segment is enough to find the closest point range
+				int step = InwayPointsCount / steps;
+				if (step < 1) step = 1;
+				float minDist = (position - inWayPoints[0].position).sqrMagnitude;
+				int toIndex = InwayPointsCount - 1;
+				int checkFrom = 0;
+				int checkTo = toIndex;
+
+				//Find the closest point range which will be checked in detail later
+				for (int i = 0; i <= toIndex; i += step)
 				{
-					distance2 = Vector3.Distance(inWayPoints[i], position);
-					if (distance < 0 || distance2 < distance)
+					if (i > toIndex) i = toIndex;
+					float dist = (position - inWayPoints[i].position).sqrMagnitude;
+					if (dist < minDist)
 					{
-						distance = distance2;
-						inWayPointIndex = i;
+						minDist = dist;
+						checkFrom = Mathf.Max(i - step, 0);
+						checkTo = Mathf.Min(i + step, InwayPointsCount - 1);
+					}
+					if (i == toIndex) break;
+				}
+				minDist = (position - inWayPoints[checkFrom].position).sqrMagnitude;
+
+				int index = checkFrom;
+				for (int i = checkFrom; i < checkTo; i++)
+				{
+					float dist = (position - inWayPoints[i].position).sqrMagnitude;
+					if (dist < minDist)
+					{
+						minDist = dist;
+						index = i;
+					}
+				}
+				//Project the point on the line between the two closest samples
+				int backIndex = Mathf.Max(index - 1, 0);
+				int frontIndex = Mathf.Min(index + 1, InwayPointsCount - 1);
+				Vector3 back = LinearAlgebraUtility.ProjectOnLine(inWayPoints[backIndex].position, inWayPoints[index].position, position);
+				Vector3 front = LinearAlgebraUtility.ProjectOnLine(inWayPoints[index].position, inWayPoints[frontIndex].position, position);
+				float backLength = (inWayPoints[index].position - inWayPoints[backIndex].position).magnitude;
+				float frontLength = (inWayPoints[index].position - inWayPoints[frontIndex].position).magnitude;
+				float backProjectDist = (back - inWayPoints[backIndex].position).magnitude;
+				float frontProjectDist = (front - inWayPoints[frontIndex].position).magnitude;
+				if (backIndex < index && index < frontIndex)
+				{
+					if ((position - back).sqrMagnitude < (position - front).sqrMagnitude)
+					{
+						RoutePoint.Lerp(inWayPoints[backIndex], inWayPoints[index], backProjectDist / backLength, out result);
+					} else {
+						RoutePoint.Lerp(inWayPoints[frontIndex], inWayPoints[index], frontProjectDist / frontLength, out result);
+					}
+				}
+				else if (backIndex < index)
+				{
+					RoutePoint.Lerp(inWayPoints[backIndex], inWayPoints[index], backProjectDist / backLength, out result);
+				}
+				else
+				{
+					RoutePoint.Lerp(inWayPoints[frontIndex], inWayPoints[index], frontProjectDist / frontLength, out result);
+				}
+
+				if (InwayPointsCount > 1 && result.percent < inWayPoints[1].percent) //Handle looped splines
+				{
+					Vector3 projected = LinearAlgebraUtility.ProjectOnLine(inWayPoints[InwayPointsCount - 1].position, inWayPoints[InwayPointsCount - 2].position, position);
+					if ((position - projected).sqrMagnitude < (position - result.position).sqrMagnitude)
+					{
+						float lerp = LinearAlgebraUtility.InverseLerp(inWayPoints[InwayPointsCount - 1].position, inWayPoints[InwayPointsCount - 2].position, projected);
+						RoutePoint.Lerp(inWayPoints[InwayPointsCount - 1], inWayPoints[InwayPointsCount - 2], lerp, out result);
 					}
 				}
 			}
 
-			cacheLastPosition = position;
-			cachePointIndex = inWayPointIndex;
-			return inWayPointIndex;
-		}
-
-		public float GetInWayProgress(Vector3 position)
-		{
-			float inWayPointIndex = GetInWayPointIndex(position);
-			return inWayPointIndex / InwayPointsCount;
+			cacheRoutePoint = result;
+			return result;
 		}
 
 		public RoutePoint GetRoutePointByProgress(float progress)
 		{
-			int inWayPointIndex = (int)(progress * InwayPointsCount) % InwayPointsCount;
-			return new RoutePoint(inWayPoints[inWayPointIndex], inWayPointDirections[inWayPointIndex]);
+			//Evaluate
+			RoutePoint result;
+			
+			int index;
+			float lerp;
+			GetSamplingValues(progress, out index, out lerp);
+			if (lerp > 0) 
+			{
+				result = RoutePoint.Lerp(inWayPoints[index], inWayPoints[index + 1], lerp);
+			} else {
+				result = inWayPoints[index];
+			}
+
+			return result;
+		}
+
+		public void GetSamplingValues(float percent, out int inWayPointsIndex, out float lerp)
+		{
+			lerp = 0;
+			percent = percent > 1 ? percent - 1 : percent;
+			float indexValue = percent * (optimizedIndices.Length - 1);
+			int index = (int)indexValue;
+			inWayPointsIndex = optimizedIndices[index];
+			float lerpPercent = 0;
+			if (index < optimizedIndices.Length - 1)
+			{
+				//Percent 0-1 between the sampleIndex and the next sampleIndex
+				float indexLerp = indexValue - index;
+				float sampleIndexPercent = (float)index / (optimizedIndices.Length - 1);
+				float nextSampleIndexPercent = (float)(index + 1) / (optimizedIndices.Length - 1);
+				//Percent 0-1 of the sample between the sampleIndices' percents
+				lerpPercent = Mathf.Lerp(sampleIndexPercent, nextSampleIndexPercent, indexLerp);
+			}
+			if (inWayPointsIndex < InwayPointsCount - 1)
+			{
+				lerp = Mathf.InverseLerp(inWayPoints[inWayPointsIndex].percent, inWayPoints[inWayPointsIndex + 1].percent, lerpPercent);
+			}
 		}
 
 		private Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float i)
@@ -90,28 +174,22 @@ namespace UnityStandardAssets.Utility
 		private void CachePositionsAndDistances()
 		{
 			//去除空的点
-			List<Transform> wayPoint2List = new List<Transform>();
+			List<Transform> wayCheckPoint2List = new List<Transform>();
 			for (int i = 0; i < WayCheckPoints?.Length; i++)
 			{
 				if (WayCheckPoints[i] != null)
 				{
-					wayPoint2List.Add(WayCheckPoints[i]);
+					wayCheckPoint2List.Add(WayCheckPoints[i]);
 				}
 			}
-			WayCheckPoints = wayPoint2List.ToArray();
-			int checkPointNum = WayCheckPoints.Length;
+			WayCheckPoints = wayCheckPoint2List.ToArray();
+			int checkPointNum = wayCheckPoint2List.Count;
 
 			// transfer the position of each point and distances between points to arrays for
 			// speed of lookup at runtime
-			List<Vector3> inWayPointList = new List<Vector3>();
-			List<Vector3> inWayPointDirectionList = new List<Vector3>();
-
-			for (int i = 0; i < WayCheckPoints.Length; ++i)
+			List<RoutePoint> inWayPointList = new List<RoutePoint>();
+			for (int i = 0; i < wayCheckPoint2List.Count; ++i)
 			{
-				var t1 = WayCheckPoints[(i) % WayCheckPoints.Length];
-				var t2 = WayCheckPoints[(i + 1) % WayCheckPoints.Length];
-				float distance = (t1.position - t2.position).magnitude;
-
 				// get indices for the surrounding four points
 				// two points(1, 2) are required by the linear lerp function
 				// four points are required by the catmull-rom function
@@ -120,15 +198,14 @@ namespace UnityStandardAssets.Utility
 				int p2n = i % checkPointNum;
 				int p3n = (i + 1) % checkPointNum;
 
-				Vector3 p0 = WayCheckPoints[p0n].position;
-				Vector3 p1 = WayCheckPoints[p1n].position;
-				Vector3 p2 = WayCheckPoints[p2n].position;
-				Vector3 p3 = WayCheckPoints[p3n].position;
+				Vector3 p0 = wayCheckPoint2List[p0n].position;
+				Vector3 p1 = wayCheckPoint2List[p1n].position;
+				Vector3 p2 = wayCheckPoint2List[p2n].position;
+				Vector3 p3 = wayCheckPoint2List[p3n].position;
 				Vector3 inWayPoint;
-				for (float dist = 0; dist < distance; dist += distance / substeps)
+				for (int j = 0; j < substeps; j++)
 				{
-					// found point numbers, now find interpolation value between the two middle points
-					float distProgress = Mathf.InverseLerp(0, distance, dist);
+					float distProgress = (float)j / substeps;
 
 					if (smoothRoute)
 					{
@@ -136,9 +213,9 @@ namespace UnityStandardAssets.Utility
 						inWayPoint = CatmullRom(p0, p1, p2, p3, distProgress);
 					} else {
 						// simple linear lerp between the two points:
-						inWayPoint = Vector3.Lerp(WayCheckPoints[p1n].position, WayCheckPoints[p2n].position, distProgress);
+						inWayPoint = Vector3.Lerp(wayCheckPoint2List[p1n].position, wayCheckPoint2List[p2n].position, distProgress);
 					}
-					inWayPointList.Add(inWayPoint);
+					inWayPointList.Add(new RoutePoint(inWayPoint, Vector3.forward));
 				}
 			}
 			if (inWayPointList.Count > 0)
@@ -148,12 +225,37 @@ namespace UnityStandardAssets.Utility
 			CircuitLength = 0;
 			for (int i = 0; i < inWayPointList.Count; i++)
 			{
-				inWayPointDirectionList.Add((inWayPointList[i] - inWayPointList[(i + 1) % inWayPointList.Count]).normalized);
-				CircuitLength += Vector3.Distance(inWayPointList[i], inWayPointList[(i + 1) % inWayPointList.Count]);
+				inWayPointList[i] = new RoutePoint(inWayPointList[i].position,
+					(inWayPointList[(i + 1) % inWayPointList.Count].position - inWayPointList[i].position).normalized,
+					(float)i / inWayPointList.Count);
+				CircuitLength += (inWayPointList[i].position - inWayPointList[(i + 1) % inWayPointList.Count].position).magnitude;
 			}
 			inWayPoints = inWayPointList.ToArray();
-			inWayPointDirections = inWayPointDirectionList.ToArray();
-			InwayPointsCount = inWayPointList.Count;
+
+			//cache optimized index percent
+			if (optimizedIndices == null || optimizedIndices.Length != InwayPointsCount) 
+			{
+				optimizedIndices = new int[InwayPointsCount];
+			}
+			optimizedIndices[0] = 0;
+			optimizedIndices[optimizedIndices.Length - 1] = InwayPointsCount - 1;
+			for (int i = 1; i < InwayPointsCount - 1; i++)
+			{
+				optimizedIndices[i] = 0;
+				float samplePercent = (float)i / (InwayPointsCount - 1);
+				for (int j = 0; j < InwayPointsCount; j++)
+				{
+					if (inWayPoints[j].percent > samplePercent)
+					{
+						break;
+					}
+					optimizedIndices[i] = j;
+				}
+			}
+			if (optimizedIndices.Length > 1)
+			{
+				optimizedIndices[optimizedIndices.Length - 1] = InwayPointsCount - 1;
+			}
 		}
 
 
@@ -171,12 +273,13 @@ namespace UnityStandardAssets.Utility
 		{
 			CachePositionsAndDistances();
 			Gizmos.color = selected ? Color.yellow : new Color(1, 1, 0, 0.5f);
-			Vector3 prev = inWayPoints?.Length > 0 ? inWayPoints[0] : Vector3.zero;
+			Vector3 prev = inWayPoints?.Length > 0 ? inWayPoints[0].position : Vector3.zero;
 			for (int i = 1; i < inWayPoints?.Length; i++)
 			{
-				Vector3 next = inWayPoints[i];
+				Vector3 next = inWayPoints[i].position;
 				Gizmos.DrawLine(prev, next);
 				Gizmos.DrawWireSphere(prev, 0.5f);
+				Gizmos.DrawLine(prev, prev + inWayPoints[i - 1].direction * 3);
 				prev = next;
 			}
 		
@@ -191,14 +294,47 @@ namespace UnityStandardAssets.Utility
 		{
 			public Vector3 position;
 			public Vector3 direction;
+			public float percent;
 
 
 
-			public RoutePoint(Vector3 position, Vector3 direction)
+			public RoutePoint(Vector3 position, Vector3 direction, float percent = 0)
 			{
 				this.position = position;
 				this.direction = direction;
+				this.percent = percent;
 			}
+
+			public void SetDirection(Vector3 direction)
+			{
+				this.direction = direction;
+			}
+
+			public void SetPercent(float percent)
+			{
+				this.percent = percent;
+			}
+
+			public static RoutePoint Lerp(RoutePoint a, RoutePoint b, float lerp)
+			{
+				RoutePoint result = new RoutePoint();
+				Lerp(a, b, lerp, out result);
+				return result;
+			}
+
+			public static void Lerp(RoutePoint a, RoutePoint b, float lerp, out RoutePoint result)
+			{
+				result.position = Vector3.Lerp(a.position, b.position, lerp);
+				result.direction = Vector3.Lerp(a.direction, b.direction, lerp);
+				result.percent = Mathf.Lerp(a.percent, b.percent, lerp);
+			}
+
+			// public void CopyFrom(RoutePoint input)
+			// {
+			// 	this.position = input.position;
+			// 	this.direction = input.direction;
+			// 	this.percent = input.percent;
+			// }
 		}
 	}
 }
@@ -206,20 +342,30 @@ namespace UnityStandardAssets.Utility
 namespace UnityStandardAssets.Utility.Inspector
 {
 #if UNITY_EDITOR
-	[CustomPropertyDrawer(typeof(WaypointCircuit))]
-	public class WaypointCircuitDrawer : PropertyDrawer
+	[CanEditMultipleObjects, CustomEditor(typeof(WaypointCircuit))]
+	public class WaypointCircuitDrawer : Editor
 	{
 		private float lineHeight = 18;
 		private float spacing = 4;
+		WaypointCircuit circuit;
+
+		private void OnEnable() {
+			circuit = (WaypointCircuit)target;
+		}
 
 
-		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+		public override void OnInspectorGUI()
 		{
-			EditorGUI.BeginProperty(position, label, property);
+			if (circuit.WayCheckPoints == null)
+			{
+				//circuit.WayCheckPoints = new Transform[1];
+			}
+			DrawDefaultInspector();
+			serializedObject.Update();
 
-			float x = position.x;
-			float y = position.y;
-			float inspectorWidth = position.width;
+			float x = 3;
+			float y = 5;
+			float inspectorWidth = 45;
 
 			// Draw label
 
@@ -228,91 +374,62 @@ namespace UnityStandardAssets.Utility.Inspector
 			var indent = EditorGUI.indentLevel;
 			EditorGUI.indentLevel = 0;
 
-			var items = property.FindPropertyRelative("wayCheckPoints");
+
+
+			var items = serializedObject.FindProperty("WayCheckPoints");
 			var titles = new string[] { "Transform", "", "", "" };
 			var props = new string[] { "transform", "^", "v", "-" };
 			var widths = new float[] { .7f, .1f, .1f, .1f };
 			float lineHeight = 18;
 			bool changedLength = false;
-			if (items.arraySize > 0)
+
+			// 查找floatArray属性
+			var elements = this.serializedObject.FindProperty("trackTransform");
+
+			// 属性元素可见，控件展开状态
+			if (EditorGUILayout.PropertyField(elements))
 			{
-				for (int i = -1; i < items.arraySize; ++i)
+				// 缩进一级
+				EditorGUI.indentLevel++;
+				// 设置元素个数
+				elements.arraySize = EditorGUILayout.DelayedIntField("Size", elements.arraySize);
+				// 绘制元素
+				for (int i = 0, size = elements.arraySize; i < size; i++)
 				{
-					var item = items.GetArrayElementAtIndex(i > 0 ? i : 0);
-
-					float rowX = x;
-					for (int n = 0; n < props.Length; ++n)
-					{
-						float w = widths[n] * inspectorWidth;
-
-						// Calculate rects
-						Rect rect = new Rect(rowX, y, w, lineHeight);
-						rowX += w;
-
-						if (i == -1)
-						{
-							EditorGUI.LabelField(rect, titles[n]);
-						}
-						else
-						{
-							if (n == 0)
-							{
-								EditorGUI.ObjectField(rect, item.objectReferenceValue, typeof(Transform), true);
-							}
-							else
-							{
-								if (GUI.Button(rect, props[n]))
-								{
-									switch (props[n])
-									{
-										case "-":
-											items.DeleteArrayElementAtIndex(i);
-											items.DeleteArrayElementAtIndex(i);
-											changedLength = true;
-											break;
-										case "v":
-											if (i > 0)
-											{
-												items.MoveArrayElement(i, i + 1);
-											}
-											break;
-										case "^":
-											if (i < items.arraySize - 1)
-											{
-												items.MoveArrayElement(i, i - 1);
-											}
-											break;
-									}
-								}
-							}
-						}
-					}
-
-					y += lineHeight + spacing;
-					if (changedLength)
-					{
-						break;
-					}
+					// 检索属性数组元素
+					var element = elements.GetArrayElementAtIndex(i);
+					EditorGUILayout.PropertyField(element);
 				}
+				// 重置缩进
+				EditorGUI.indentLevel--;
 			}
-			else
+			// 分隔符
+			EditorGUILayout.Separator();
+			// 缩进一级
+			EditorGUI.indentLevel++;
+			for (int i = 0; i < circuit.WayCheckPoints?.Length; i++)
 			{
-				// add button
-				var addButtonRect = new Rect((x + position.width) - widths[widths.Length - 1] * inspectorWidth, y,
-											 widths[widths.Length - 1] * inspectorWidth, lineHeight);
-				if (GUI.Button(addButtonRect, "+"))
-				{
-					items.InsertArrayElementAtIndex(items.arraySize);
-				}
-
-				y += lineHeight + spacing;
+				circuit.WayCheckPoints[i] = (Transform)EditorGUILayout.ObjectField(i + ".", circuit.WayCheckPoints[i], typeof(Transform), true);
 			}
+			// 重置缩进
+			EditorGUI.indentLevel--;
+
+			
+			// add button
+			var addButtonRect = new Rect(x , y, 3, lineHeight);
+			if (GUILayout.Button("+"))
+			{
+				circuit.WayCheckPoints = new Transform[circuit.WayCheckPoints.Length + 1];
+				//items.InsertArrayElementAtIndex(items.arraySize);
+			}
+
+			y += lineHeight + spacing;
+			
 
 			// add all button
 			var addAllButtonRect = new Rect(x, y, inspectorWidth, lineHeight);
-			if (GUI.Button(addAllButtonRect, "Assign using all child objects"))
+			if (GUILayout.Button("Assign using all child objects"))
 			{
-				var circuit = property.FindPropertyRelative("circuit").objectReferenceValue as WaypointCircuit;
 				var children = new Transform[circuit.transform.childCount];
 				int n = 0;
 				foreach (Transform child in circuit.transform)
@@ -330,9 +447,8 @@ namespace UnityStandardAssets.Utility.Inspector
 
 			// add all button
 			var addAllOnTrackTransformButtonRect = new Rect(x, y, inspectorWidth, lineHeight);
-			if (GUI.Button(addAllOnTrackTransformButtonRect, "Assign using all Track Trans child objects"))
+			if (GUILayout.Button("Assign using all Track Trans child objects"))
 			{
-				var circuit = property.FindPropertyRelative("circuit").objectReferenceValue as WaypointCircuit;
 				var children = new Transform[circuit.trackTransform.childCount];
 				int n = 0;
 				for (int i = 0; i < children.Length; i++)
@@ -350,24 +466,30 @@ namespace UnityStandardAssets.Utility.Inspector
 
 			// rename all button
 			var renameButtonRect = new Rect(x, y, inspectorWidth, lineHeight);
-			if (GUI.Button(renameButtonRect, "Auto Rename numerically from this order"))
+			if (GUILayout.Button("Auto Rename numerically from this order"))
 			{
-				var circuit = property.FindPropertyRelative("circuit").objectReferenceValue as WaypointCircuit;
 				int n = 0;
 				foreach (Transform child in circuit.WayCheckPoints)
 				{
 					child.name = "Waypoint " + (n++).ToString("000");
 				}
 			}
-			y += lineHeight + spacing;
 
-			// Set indent back to what it was
-			EditorGUI.indentLevel = indent;
-			EditorGUI.EndProperty();
+			// 分隔符
+			EditorGUILayout.Separator();
+
+
+			serializedObject.ApplyModifiedProperties();
+
+			//当Inspector 面板发生变化时保存数据
+			if (GUI.changed)
+			{
+				EditorUtility.SetDirty(target);
+			}
 		}
 
 
-		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+		public float GetPropertyHeight(SerializedProperty property, GUIContent label)
 		{
 			SerializedProperty items = property.FindPropertyRelative("items");
 			float lineAndSpace = lineHeight + spacing;
@@ -383,6 +505,7 @@ namespace UnityStandardAssets.Utility.Inspector
 				return ((Transform)x).name.CompareTo(((Transform)y).name);
 			}
 		}
+
 
 		// comparer for check distances in ray cast hits
 		public class TransforSiblingIndexComparer : IComparer
