@@ -60,7 +60,7 @@ namespace KartGame.KartSystems
             {
                 Vector3 direction = GetDirectionFromAngle(Angles[i], Vector3.up, transform.forward);
 
-                if (Physics.Raycast(origin, direction, out RaycastHit hit, RayDistance, CollisionLayer) && Time.time > resumeTime && !hasCollided && kart.LocalSpeed() > 0)
+                if (Physics.Raycast(origin, direction, out RaycastHit hit, RayDistance, CollisionLayer) && Time.time > resumeTime && !hasCollided && kart.SpeedValue > 0)
                 {
                     // If the hit normal is pointing up, then we don't want to bounce
                     if (Vector3.Dot(hit.normal, Vector3.up) > 0.2f) 

@@ -467,26 +467,29 @@ namespace KartGame.KartSystems
             Vector3 euler      = transform.rotation.eulerAngles;
             euler.x            = euler.z = 0f;
             transform.rotation = Quaternion.Euler(euler);
-        }
+		}
 
-        public float LocalSpeed()
-        {
-            if (canMove)
-            {
-                float dot = Vector3.Dot(transform.forward, Rigidbody.velocity);
-                if (Mathf.Abs(dot) > 0.1f)
-                {
-                    float speed = Rigidbody.velocity.magnitude;
-                    return dot < 0 ? -(speed / finalStats.ReverseSpeed) : (speed / finalStats.TopSpeed);
-                }
-                return 0f;
-            }
-            else
-            {
-                // use this value to play kart sound when it is waiting the race start countdown.
-                return Input.y;
-            }
-        }
+		public float SpeedValue
+		{
+			get
+			{
+				if (canMove)
+				{
+					float dot = Vector3.Dot(transform.forward, Rigidbody.velocity);
+					if (Mathf.Abs(dot) > 0.1f)
+					{
+						float speed = Rigidbody.velocity.magnitude;
+						return dot < 0 ? -(speed / finalStats.ReverseSpeed) : (speed / finalStats.TopSpeed);
+					}
+					return 0f;
+				} else {
+					// use this value to play kart sound when it is waiting the race start countdown.
+					return Input.y;
+				}
+			}
+		}
+
+		public Vector3 Speed { get { return Rigidbody.velocity; } }
 
         public void SetCanMove(bool move)
         {

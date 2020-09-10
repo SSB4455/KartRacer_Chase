@@ -93,7 +93,10 @@ public class ArcadeKartAgent : Agent, IInput
 		agentInput.y = vectorAction[1];
 
 		// Reward Speed
-		AddReward(arcadeKart.LocalSpeed() / 100f);
+		Vector3 carSpeed = arcadeKart.Speed;
+		Vector3 wayDirection = racingObserver.GetCircuitWayDirection(currentLoopProgress);
+		AddReward(Mathf.Sign(Vector3.Dot(carSpeed, wayDirection)) * carSpeed.magnitude / 100f);
+		
 
 
 		// Reached target
