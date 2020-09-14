@@ -80,7 +80,8 @@ public class ArcadeKartAgent : Agent, IInput
 		// Match finish reward
 		if (lastLoopProgress > 0.9f && currentLoopProgress < 0.1)
 		{
-			AddReward(1);
+			Debug.Log("finish CircuitTime = " + racingObserver.GetCircuitTime());
+			AddReward(10000f / racingObserver.GetCircuitTime());
 			EndEpisode();
 		}
 		lastLoopProgress = currentLoopProgress;
@@ -95,9 +96,9 @@ public class ArcadeKartAgent : Agent, IInput
 		// Reward Speed
 		Vector3 carSpeed = arcadeKart.Speed;
 		Vector3 wayDirection = racingObserver.GetCircuitWayDirection(currentLoopProgress);
-		AddReward(Mathf.Sign(Vector3.Dot(carSpeed, wayDirection)) * carSpeed.magnitude / 100f);
+		int speedFollow = Vector3.Dot(carSpeed, wayDirection) < 0 ? -10 : 1;
+		AddReward(speedFollow * carSpeed.magnitude / 100f);
 		
-
 
 		// Reached target
 		//if (distanceToTarget < 1.42f)
@@ -109,6 +110,7 @@ public class ArcadeKartAgent : Agent, IInput
 		// Fell off platform
 		if (this.transform.localPosition.y < 0)
 		{
+			Debug.LogWarning("Fell off platform");
 			AddReward(-1);
 			EndEpisode();
 		}

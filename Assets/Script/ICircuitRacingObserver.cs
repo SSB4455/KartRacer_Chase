@@ -12,6 +12,7 @@ public interface ICircuitRacingObserver
 
 	float GetCircuitProgress();
 	float GetCurrentLoopProgress();
+	int GetCircuitTime();
 	float GetCircuitLength();
 	Vector3 GetStartPointPosition();
 	Quaternion GetStartPointRotation();

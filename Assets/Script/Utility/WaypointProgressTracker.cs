@@ -44,6 +44,7 @@ namespace UnityStandardAssets.Utility
 		public WaypointCircuit.RoutePoint progressPoint { get; private set; }
 
 		Transform target;
+		DateTime startTime;
 
 		private float progressDistance; // The progress round the route, used in smooth mode.
 		private int progressNum; // the current waypoint number, used in point-to-point mode.
@@ -80,6 +81,7 @@ namespace UnityStandardAssets.Utility
 				target.position = GetStartPointPosition();
 				target.rotation = GetStartPointRotation();
 			}
+			startTime = DateTime.Now;
 		}
 
 		public Vector3 GetStartPointPosition()
@@ -117,6 +119,15 @@ namespace UnityStandardAssets.Utility
 		public Vector3 GetCircuitWayDirection(float circuitProgress)
 		{
 			return circuit.GetRoutePointByProgress(circuitProgress).direction;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>返回从开始到现在的时间(毫秒)</returns>
+		public int GetCircuitTime()
+		{
+			return (DateTime.Now - startTime).Milliseconds;
 		}
 
 		public int GetRank()
