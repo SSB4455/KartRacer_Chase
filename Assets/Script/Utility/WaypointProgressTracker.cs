@@ -41,10 +41,13 @@ namespace UnityStandardAssets.Utility
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint targetPoint { get; private set; }
 		public WaypointCircuit.RoutePoint speedPoint { get; private set; }
-		public WaypointCircuit.RoutePoint progressPoint { get; private set; }
+		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
+		public WaypointCircuit.RoutePoint lastInWayRoutePoint { get; private set; }
 
 		Transform target;
 		DateTime startTime;
+		int loopCount = 1;
+		int finishLoopCount = 0;
 
 		private float progressDistance; // The progress round the route, used in smooth mode.
 		private int progressNum; // the current waypoint number, used in point-to-point mode.
@@ -70,23 +73,21 @@ namespace UnityStandardAssets.Utility
 			Reset();
 		}
 
-
 		// reset the object to sensible values
 		public void Reset()
 		{
-			progressDistance = 0;
-			progressNum = 0;
 			if (progressStyle == ProgressStyle.PointToPoint)
 			{
 				target.position = GetStartPointPosition();
 				target.rotation = GetStartPointRotation();
 			}
+			finishLoopCount = 0;
 			startTime = DateTime.Now;
 		}
 
 		public Vector3 GetStartPointPosition()
 		{
-			return circuit.WayCheckPoints[0].position + new Vector3(0, 1, 0);
+			return circuit.GetRoutePointByProgress(0).position + new Vector3(0, 1, 0);
 		}
 
 		public Quaternion GetStartPointRotation()
@@ -96,19 +97,38 @@ namespace UnityStandardAssets.Utility
 
 		private void Update()
 		{
-			//GetCurrentLoopProgress();
+			inWayRoutePoint = circuit.GetRoutePoint(transform.position);
+			if (lastInWayRoutePoint.percent > 0.8f && inWayRoutePoint.percent < 0.2f)
+			{
+				finishLoopCount++;
+			}
+			if (lastInWayRoutePoint.percent < 0.2f && inWayRoutePoint.percent > 0.8f)
+			{
+				finishLoopCount--;
+			}
+			lastInWayRoutePoint = inWayRoutePoint;
+			//Debug.Log("finishLoopCount = " + finishLoopCount + "\t LoopProgress = " + GetLoopProgress());
+			
 		}
 
-		public float GetCircuitProgress()
+		public float GetMatchProgress()
 		{
-			return GetCurrentLoopProgress();
+			return finishLoopCount + GetLoopProgress();
 		}
 
-		public float GetCurrentLoopProgress()
+		public float GetLoopProgress()
 		{
-			progressPoint = circuit.GetRoutePoint(transform.position);
-			//progressPoint = circuit.GetRoutePointByProgress(progressPoint.percent + 0.1f);
-			return progressPoint.percent;
+			return (finishLoopCount < 0 ? -1 : 0) + inWayRoutePoint.percent;
+		}
+
+		public bool MatchFinish()
+		{
+			return GetLoopCount() <= finishLoopCount;
+		}
+
+		public int GetLoopCount()
+		{
+			return loopCount;
 		}
 
 		public float GetCircuitLength()
@@ -141,8 +161,8 @@ namespace UnityStandardAssets.Utility
 			if (Application.isPlaying)
 			{
 				Gizmos.color = Color.green;
-				Gizmos.DrawWireSphere(progressPoint.position, 1);
-				Gizmos.DrawLine(progressPoint.position, progressPoint.position + progressPoint.direction * 3);
+				Gizmos.DrawWireSphere(inWayRoutePoint.position, 1);
+				Gizmos.DrawLine(inWayRoutePoint.position, inWayRoutePoint.position + inWayRoutePoint.direction * 3);
 				Gizmos.color = Color.yellow;
 				//Gizmos.DrawLine(target.position, target.position + target.forward * 3);
 			}

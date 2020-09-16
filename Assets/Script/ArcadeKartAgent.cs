@@ -6,6 +6,8 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using System.Collections.Generic;
+using System;
+using System.IO;
 
 public class ArcadeKartAgent : Agent, IInput
 {
@@ -25,25 +27,41 @@ public class ArcadeKartAgent : Agent, IInput
 	public ArcadeKartRaycastSensor[] raycastSensors;
 #endregion
 
-	#region Debugging
+#region Debugging
 	[Header("Debug Option")]
 	[Tooltip("Should we visualize the rays that the agent draws?")]
 	public bool ShowRaycasts;
-	#endregion
+
+	string trainingLog;
+#endregion
 
 
 
 	public override void OnEpisodeBegin()
 	{
 		racingObserver = GetComponent<ICircuitRacingObserver>();
+		racingObserver.Reset();
 
 		transform.position = racingObserver.GetStartPointPosition();
 		transform.rotation = racingObserver.GetStartPointRotation();
 
 		arcadeKart.Rigidbody.velocity = Vector3.zero;
+		trainingLog = "";
 	}
 
-	float lastLoopProgress;
+	public new void AddReward(float increment)
+	{
+		trainingLog += "AddReward\t" + DateTime.Now + "\t" + increment + "\n";
+		base.AddReward(increment);
+	}
+
+	public new void EndEpisode()
+	{
+		File.WriteAllText(Path.Combine(Directory.GetParent(Application.dataPath).ToString(), 
+			"ml-agents_config", "ArcadeKartAgent_training_log_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt"), trainingLog);
+		base.EndEpisode();
+	}
+
 	float currentLoopProgress;
 	public override void CollectObservations(VectorSensor sensor)
 	{
@@ -63,28 +81,28 @@ public class ArcadeKartAgent : Agent, IInput
 		}
 
 		//比赛完成度 前一辆车比赛完成度 后一辆车比赛完成度
-		sensor.AddObservation(racingObserver.GetCircuitProgress());
-		sensor.AddObservation(racingObserver.GetCircuitProgress());
-		sensor.AddObservation(racingObserver.GetCircuitProgress());
+		sensor.AddObservation(racingObserver.GetMatchProgress());
+		sensor.AddObservation(racingObserver.GetMatchProgress());
+		sensor.AddObservation(racingObserver.GetMatchProgress());
 
 		//当前排名 目标排名
 		sensor.AddObservation(racingObserver.GetRank());
 		sensor.AddObservation(targetRank);
 
 		// Road forward (current 10m 20m)
-		currentLoopProgress = racingObserver.GetCurrentLoopProgress();
+		currentLoopProgress = racingObserver.GetLoopProgress();
 		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 0));
 		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 10));
 		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 20));
 
 		// Match finish reward
-		if (lastLoopProgress > 0.9f && currentLoopProgress < 0.1)
+		if (racingObserver.MatchFinish())
 		{
 			Debug.Log("finish CircuitTime = " + racingObserver.GetCircuitTime());
 			AddReward(10000f / racingObserver.GetCircuitTime());
+			trainingLog += "finish CircuitTime = \t" + racingObserver.GetCircuitTime() + "\n";
 			EndEpisode();
 		}
-		lastLoopProgress = currentLoopProgress;
 	}
 
 	public override void OnActionReceived(float[] vectorAction)
@@ -114,6 +132,11 @@ public class ArcadeKartAgent : Agent, IInput
 			AddReward(-1);
 			EndEpisode();
 		}
+	}
+
+	public override void Heuristic(float[] actionsOut)
+	{
+
 	}
 
 	void OnCollisionEnter(Collision other)

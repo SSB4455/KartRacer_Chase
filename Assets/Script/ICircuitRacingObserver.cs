@@ -9,13 +9,15 @@ using UnityEngine;
 
 public interface ICircuitRacingObserver
 {
-
-	float GetCircuitProgress();
-	float GetCurrentLoopProgress();
+	void Reset();
+	float GetMatchProgress();
+	float GetLoopProgress();
+	bool MatchFinish();
 	int GetCircuitTime();
 	float GetCircuitLength();
 	Vector3 GetStartPointPosition();
 	Quaternion GetStartPointRotation();
 	Vector3 GetCircuitWayDirection(float circuitProgress);
 	int GetRank();
+	int GetLoopCount();
 }

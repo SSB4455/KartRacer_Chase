@@ -63,4 +63,8 @@ Agent velocity|3|车辆当前的速度
 cd ml-agents_config
 activate ml-agents_release2
 mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
---resume
+mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --resume
+
+## 使用插件
+
+https://github.com/monitor1394/unity-ugui-XCharts

@@ -142,7 +142,8 @@ namespace UnityStandardAssets.Utility
 		public void GetSamplingValues(float percent, out int inWayPointsIndex, out float lerp)
 		{
 			lerp = 0;
-			percent = percent > 1 ? percent - 1 : percent;
+			percent = Mathf.Abs(percent);
+			percent = percent - (int)percent;
 			float indexValue = percent * (optimizedIndices.Length - 1);
 			int index = (int)indexValue;
 			inWayPointsIndex = optimizedIndices[index];
@@ -409,19 +410,24 @@ namespace UnityStandardAssets.Utility.Inspector
 			EditorGUI.indentLevel++;
 			for (int i = 0; i < circuit.WayCheckPoints?.Length; i++)
 			{
+				//水平布局
+				EditorGUILayout.BeginHorizontal();
+
 				circuit.WayCheckPoints[i] = (Transform)EditorGUILayout.ObjectField(i + ".", circuit.WayCheckPoints[i], typeof(Transform), true);
+				if (GUILayout.Button("+", GUILayout.Width(20)))
+				{
+
+				}
+				if (GUILayout.Button("-", GUILayout.Width(20)))
+				{
+
+				}
+				GUILayout.EndHorizontal();
 			}
 			// 重置缩进
 			EditorGUI.indentLevel--;
 
 			
-			// add button
-			var addButtonRect = new Rect(x , y, 3, lineHeight);
-			if (GUILayout.Button("+"))
-			{
-				circuit.WayCheckPoints = new Transform[circuit.WayCheckPoints.Length + 1];
-				//items.InsertArrayElementAtIndex(items.arraySize);
-			}
 
 			y += lineHeight + spacing;
 			
