@@ -6,12 +6,13 @@
 
 ## 下一步要做
 
+- 增加行驶中获得奖励及用时UI显示(记录数据并能够恢复查看)
 - 加入ArcadeKart能够普通驾驶
-- 搭建简单赛道(拥有赛道外墙壁 使赛车无法穿越)
-- 自动检测墙壁及赛道的简单AI驾驶框架车辆
-- 开始进行自动驾驶训练(时间越少奖励越多)
-- 扩展ArcadeKart的操作(漂移 手刹)
+- 增加进入界面选择手动操作还是机器训练
+- 增加编辑赛道
 - 修复赛道内Prefab 制作更多赛道
+- 自动检测墙壁及赛道的简单AI驾驶框架车辆
+- 扩展ArcadeKart的操作(漂移 手刹)
 - 中断后继续训练等训练指令及参数记录文档
 - AI车手可以互相竞速训练
 - 将场景中环境(比如树和楼房替换为Prefab) 并将整体环境制作为Prefab
@@ -62,8 +63,8 @@ Agent velocity|3|车辆当前的速度
 
 cd ml-agents_config
 activate ml-agents_release2
-mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
 mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --resume
+mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
 
 ## 使用插件
 

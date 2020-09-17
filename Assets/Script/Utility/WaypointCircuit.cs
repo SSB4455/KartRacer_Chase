@@ -194,10 +194,10 @@ namespace UnityStandardAssets.Utility
 				// get indices for the surrounding four points
 				// two points(1, 2) are required by the linear lerp function
 				// four points are required by the catmull-rom function
-				int p0n = ((i - 2) + checkPointNum) % checkPointNum;
-				int p1n = ((i - 1) + checkPointNum) % checkPointNum;
-				int p2n = i % checkPointNum;
-				int p3n = (i + 1) % checkPointNum;
+				int p0n = ((i - 1) + checkPointNum) % checkPointNum;
+				int p1n = i % checkPointNum;
+				int p2n = (i + 1) % checkPointNum;
+				int p3n = (i + 2) % checkPointNum;
 
 				Vector3 p0 = wayCheckPoint2List[p0n].position;
 				Vector3 p1 = wayCheckPoint2List[p1n].position;
@@ -218,10 +218,6 @@ namespace UnityStandardAssets.Utility
 					}
 					inWayPointList.Add(new RoutePoint(inWayPoint, Vector3.forward));
 				}
-			}
-			if (inWayPointList.Count > 0)
-			{
-				inWayPointList.Add(inWayPointList[0]);
 			}
 			CircuitLength = 0;
 			for (int i = 0; i < inWayPointList.Count; i++)
@@ -350,10 +346,11 @@ namespace UnityStandardAssets.Utility.Inspector
 		private float spacing = 4;
 		WaypointCircuit circuit;
 
+
+
 		private void OnEnable() {
 			circuit = (WaypointCircuit)target;
 		}
-
 
 		public override void OnInspectorGUI()
 		{
