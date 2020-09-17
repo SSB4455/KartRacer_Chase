@@ -69,8 +69,6 @@ namespace UnityStandardAssets.Utility
 			{
 				target = new GameObject(name + " Waypoint Target").transform;
 			}
-
-			Reset();
 		}
 
 		// reset the object to sensible values
@@ -145,9 +143,10 @@ namespace UnityStandardAssets.Utility
 		/// 
 		/// </summary>
 		/// <returns>返回从开始到现在的时间(毫秒)</returns>
-		public int GetCircuitTime()
+		public long GetCircuitTime()
 		{
-			return (DateTime.Now - startTime).Milliseconds;
+			//Debug.Log(DateTime.Now + " -> " + startTime);
+			return ((DateTime.Now - startTime).Ticks / 10000);
 		}
 
 		public int GetRank()

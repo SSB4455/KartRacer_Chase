@@ -94,15 +94,6 @@ public class ArcadeKartAgent : Agent, IInput
 		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 0));
 		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 10));
 		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 20));
-
-		// Match finish reward
-		if (racingObserver.MatchFinish())
-		{
-			Debug.Log("finish CircuitTime = " + racingObserver.GetCircuitTime());
-			AddReward(10000f / racingObserver.GetCircuitTime());
-			trainingLog += "finish CircuitTime = \t" + racingObserver.GetCircuitTime() + "\n";
-			EndEpisode();
-		}
 	}
 
 	public override void OnActionReceived(float[] vectorAction)
@@ -130,6 +121,16 @@ public class ArcadeKartAgent : Agent, IInput
 		{
 			Debug.LogWarning("Fell off platform");
 			AddReward(-1);
+			EndEpisode();
+		}
+
+		// Match finish reward
+		if (racingObserver.MatchFinish())
+		{
+			long matchTime = racingObserver.GetCircuitTime();
+			Debug.Log("finish CircuitTime = " + matchTime);
+			AddReward(1000000f / matchTime);
+			trainingLog += "finish CircuitTime = \t" + matchTime / 1000f + "s\n";
 			EndEpisode();
 		}
 	}
