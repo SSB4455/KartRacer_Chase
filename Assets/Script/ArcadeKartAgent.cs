@@ -105,8 +105,8 @@ public class ArcadeKartAgent : Agent, IInput
 		// Reward Speed
 		Vector3 carSpeed = arcadeKart.Speed;
 		Vector3 wayDirection = racingObserver.GetCircuitWayDirection(currentLoopProgress);
-		int speedFollow = Vector3.Dot(carSpeed, wayDirection) < 0 ? -10 : 1;
-		AddReward(speedFollow * carSpeed.magnitude / 100f);
+		int speedFollow = Vector3.Dot(carSpeed, wayDirection) < 0 ? -5 : 1;
+		AddReward(speedFollow * carSpeed.magnitude);
 		
 
 		// Reached target
@@ -128,7 +128,7 @@ public class ArcadeKartAgent : Agent, IInput
 		if (racingObserver.MatchFinish())
 		{
 			long matchTime = racingObserver.GetCircuitTime();
-			Debug.Log("finish CircuitTime = " + matchTime);
+			Debug.Log("finish CircuitTime = " + matchTime / 1000f + "s");
 			AddReward(1000000f / matchTime);
 			trainingLog += "finish CircuitTime = \t" + matchTime / 1000f + "s\n";
 			EndEpisode();
