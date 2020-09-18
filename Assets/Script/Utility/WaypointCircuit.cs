@@ -10,6 +10,7 @@ namespace UnityStandardAssets.Utility
 {
 	public class WaypointCircuit : MonoBehaviour
 	{
+		public string circuitName;
 		public Transform trackTransform;
 		[SerializeField] private bool smoothRoute = true;
 		[SerializeField] private int substeps = 10;

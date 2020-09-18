@@ -7,8 +7,13 @@
 ## 下一步要做
 
 - 增加行驶中获得奖励及用时UI显示(记录数据并能够恢复查看)
+  - 单圈时间 总时间
+  - 当前奖励 总奖励
+  - 查看当前操作(开车的油门刹车方向)
 - 加入ArcadeKart能够普通驾驶
 - 增加进入界面选择手动操作还是机器训练
+  - 赛道序列的训练进程(赛道循环 赛道随机)
+- 调整墙壁碰撞效果(前速 反弹 碰撞检测到的类型)
 - 增加编辑赛道
 - 修复赛道内Prefab 制作更多赛道
 - 自动检测墙壁及赛道的简单AI驾驶框架车辆
@@ -68,4 +73,5 @@ mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
 
 ## 使用插件
 
-https://github.com/monitor1394/unity-ugui-XCharts
+[Curvy Splines](https://assetstore.unity.com/packages/tools/utilities/curvy-splines-7038)
+[unity-ugui-XCharts](https://github.com/monitor1394/unity-ugui-XCharts)

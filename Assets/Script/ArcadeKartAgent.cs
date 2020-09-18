@@ -46,12 +46,12 @@ public class ArcadeKartAgent : Agent, IInput
 		transform.rotation = racingObserver.GetStartPointRotation();
 
 		arcadeKart.Rigidbody.velocity = Vector3.zero;
-		trainingLog = "";
+		trainingLog = "Circuit = " + racingObserver.GrtCircuitName() + "\tlength = " + racingObserver.GetCircuitLength() + "\n";
 	}
 
 	public new void AddReward(float increment)
 	{
-		trainingLog += "AddReward\t" + DateTime.Now + "\t" + increment + "\n";
+		trainingLog += "AddReward\t" + DateTime.Now.ToString("HH:mm:ss.fff") + "\t" + increment + "\n";
 		base.AddReward(increment);
 	}
 
@@ -91,9 +91,9 @@ public class ArcadeKartAgent : Agent, IInput
 
 		// Road forward (current 10m 20m)
 		currentLoopProgress = racingObserver.GetLoopProgress();
-		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 0));
-		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 10));
-		sensor.AddObservation(WayDirectionObservation(currentLoopProgress, 20));
+		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 0));
+		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 10));
+		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 20));
 	}
 
 	public override void OnActionReceived(float[] vectorAction)
@@ -104,40 +104,38 @@ public class ArcadeKartAgent : Agent, IInput
 
 		// Reward Speed
 		Vector3 carSpeed = arcadeKart.Speed;
-		Vector3 wayDirection = racingObserver.GetCircuitWayDirection(currentLoopProgress);
+		Vector3 wayDirection = racingObserver.GetGuideLineDirection(currentLoopProgress);
 		int speedFollow = Vector3.Dot(carSpeed, wayDirection) < 0 ? -5 : 1;
 		AddReward(speedFollow * carSpeed.magnitude);
-		
-
-		// Reached target
-		//if (distanceToTarget < 1.42f)
-		{
-			//SetReward(1.0f);
-			//EndEpisode();
-		}
 
 		// Fell off platform
 		if (this.transform.localPosition.y < 0)
 		{
 			Debug.LogWarning("Fell off platform");
-			AddReward(-1);
+			AddReward(-100);
 			EndEpisode();
 		}
 
 		// Match finish reward
 		if (racingObserver.MatchFinish())
 		{
-			long matchTime = racingObserver.GetCircuitTime();
-			Debug.Log("finish CircuitTime = " + matchTime / 1000f + "s");
-			AddReward(1000000f / matchTime);
-			trainingLog += "finish CircuitTime = \t" + matchTime / 1000f + "s\n";
+			TimeSpan matchTime = racingObserver.GetMatchTime();
+			Debug.Log("finish matchTime = " + matchTime);
+			AddReward(racingObserver.GetTotalLoopCount() * racingObserver.GetCircuitLength() * 10 / (float)matchTime.TotalSeconds);
+			trainingLog += "finish CircuitTime = \t" + matchTime + "\n";
 			EndEpisode();
 		}
 	}
 
+	public Vector2 GenerateInput()
+	{
+		return agentInput;
+	}
+
 	public override void Heuristic(float[] actionsOut)
 	{
-
+		agentInput.x = actionsOut[0];
+		agentInput.y = actionsOut[1];
 	}
 
 	void OnCollisionEnter(Collision other)
@@ -161,14 +159,14 @@ public class ArcadeKartAgent : Agent, IInput
 		
 	}
 
-	List<float> WayDirectionObservation(float roadProgress, float offset)
+	List<float> GetGuideLineDirectionObservation(float roadProgress, float offset)
 	{
-		Vector3 direction = racingObserver.GetCircuitWayDirection(roadProgress + (offset / racingObserver.GetCircuitLength()));
+		Vector3 direction = racingObserver.GetGuideLineDirection(roadProgress + (offset / racingObserver.GetCircuitLength()));
 		return new List<float> { offset, direction.x, direction.y, direction.z };
 	}
 
-	public Vector2 GenerateInput()
-	{
-		return agentInput;
-	}
+
+	//ArcadeKartGuideLinePropertie : MonoBehaviour
+	//public int forwardDistance;
+	//public bool ShowRaycasts;
 }

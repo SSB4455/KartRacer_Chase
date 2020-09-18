@@ -14,23 +14,8 @@ namespace UnityStandardAssets.Utility
 
 		[SerializeField] private WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
 
-		[SerializeField] private float lookAheadForTargetOffset = 5;
-		// The offset ahead along the route that the we will aim for
-
-		[SerializeField] private float lookAheadForTargetFactor = .1f;
-		// A multiplier adding distance ahead along the route to aim for, based on current speed
-
-		[SerializeField] private float lookAheadForSpeedOffset = 10;
-		// The offset ahead only the route for speed adjustments (applied as the rotation of the waypoint target transform)
-
-		[SerializeField] private float lookAheadForSpeedFactor = .2f;
-		// A multiplier adding distance ahead along the route for speed adjustments
-
 		[SerializeField] private ProgressStyle progressStyle = ProgressStyle.SmoothAlongRoute;
 		// whether to update the position smoothly along the route (good for curved paths) or just when we reach each waypoint.
-
-		[SerializeField] private float pointToPointThreshold = 4;
-		// proximity to waypoint which must be reached to switch target to next waypoint : only used in PointToPoint mode.
 
 		public enum ProgressStyle
 		{
@@ -39,15 +24,15 @@ namespace UnityStandardAssets.Utility
 		}
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
-		public WaypointCircuit.RoutePoint targetPoint { get; private set; }
-		public WaypointCircuit.RoutePoint speedPoint { get; private set; }
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
 		public WaypointCircuit.RoutePoint lastInWayRoutePoint { get; private set; }
 
-		Transform target;
 		DateTime startTime;
+		DateTime loopStartTime;
+		TimeSpan matchtTime = TimeSpan.Zero;
 		int loopCount = 1;
 		int finishLoopCount = 0;
+		int maxFinishLoopCount = 0;
 
 		private float progressDistance; // The progress round the route, used in smooth mode.
 		private int progressNum; // the current waypoint number, used in point-to-point mode.
@@ -59,38 +44,47 @@ namespace UnityStandardAssets.Utility
 		// setup script properties
 		private void Start()
 		{
-			// we use a transform to represent the point to aim for, and the point which
-			// is considered for upcoming changes-of-speed. This allows this component
-			// to communicate this information to the AI without requiring further dependencies.
+			Reset();
+		}
 
-			// You can manually create a transform and assign it to this component *and* the AI,
-			// then this component will update it, and the AI can read it.
-			if (target == null)
-			{
-				target = new GameObject(name + " Waypoint Target").transform;
-			}
+		public string GrtCircuitName()
+		{
+			return circuit.circuitName;
 		}
 
 		// reset the object to sensible values
 		public void Reset()
 		{
-			if (progressStyle == ProgressStyle.PointToPoint)
-			{
-				target.position = GetStartPointPosition();
-				target.rotation = GetStartPointRotation();
-			}
 			finishLoopCount = 0;
 			startTime = DateTime.Now;
+			loopStartTime = startTime;
+			lastInWayRoutePoint = circuit.GetRoutePointByProgress(0);
+			inWayRoutePoint = circuit.GetRoutePoint(transform.position);
 		}
 
-		public Vector3 GetStartPointPosition()
+		public Vector3 GetStartPointPosition(int rank)
 		{
 			return circuit.GetRoutePointByProgress(0).position + new Vector3(0, 1, 0);
 		}
 
-		public Quaternion GetStartPointRotation()
+		public Quaternion GetStartPointRotation(int rank)
 		{
 			return Quaternion.Euler(circuit.GetRoutePointByProgress(0).direction);
+		}
+
+		public int GetMaxFinishLoopCount()
+		{
+			return maxFinishLoopCount;
+		}
+
+		public int GetTotalLoopCount()
+		{
+			return loopCount;
+		}
+
+		public float GetCircuitLength()
+		{
+			return circuit.CircuitLength;
 		}
 
 		private void Update()
@@ -99,6 +93,15 @@ namespace UnityStandardAssets.Utility
 			if (lastInWayRoutePoint.percent > 0.8f && inWayRoutePoint.percent < 0.2f)
 			{
 				finishLoopCount++;
+				if (maxFinishLoopCount < finishLoopCount)
+				{
+					maxFinishLoopCount = finishLoopCount;
+					loopStartTime = DateTime.Now;
+					if (MatchFinish())
+					{
+						matchtTime = DateTime.Now - startTime;
+					}
+				}
 			}
 			if (lastInWayRoutePoint.percent < 0.2f && inWayRoutePoint.percent > 0.8f)
 			{
@@ -106,7 +109,6 @@ namespace UnityStandardAssets.Utility
 			}
 			lastInWayRoutePoint = inWayRoutePoint;
 			//Debug.Log("finishLoopCount = " + finishLoopCount + "\t LoopProgress = " + GetLoopProgress());
-			
 		}
 
 		public float GetMatchProgress()
@@ -121,32 +123,28 @@ namespace UnityStandardAssets.Utility
 
 		public bool MatchFinish()
 		{
-			return GetLoopCount() <= finishLoopCount;
+			return GetTotalLoopCount() <= finishLoopCount;
 		}
 
-		public int GetLoopCount()
+		public Vector3 GetGuideLinePosition(float loopProgress)
 		{
-			return loopCount;
+			return circuit.GetRoutePointByProgress(loopProgress).position;
 		}
 
-		public float GetCircuitLength()
+		public Vector3 GetGuideLineDirection(float loopProgress)
 		{
-			return circuit.CircuitLength;
+			return circuit.GetRoutePointByProgress(loopProgress).direction;
 		}
 
-		public Vector3 GetCircuitWayDirection(float circuitProgress)
+		public TimeSpan GetLoopTime()
 		{
-			return circuit.GetRoutePointByProgress(circuitProgress).direction;
+			return DateTime.Now - loopStartTime;
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns>返回从开始到现在的时间(毫秒)</returns>
-		public long GetCircuitTime()
+		public TimeSpan GetMatchTime()
 		{
 			//Debug.Log(DateTime.Now + " -> " + startTime);
-			return ((DateTime.Now - startTime).Ticks / 10000);
+			return matchtTime == TimeSpan.Zero ? matchtTime : DateTime.Now - startTime;
 		}
 
 		public int GetRank()

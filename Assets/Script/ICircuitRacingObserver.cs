@@ -9,15 +9,21 @@ using UnityEngine;
 
 public interface ICircuitRacingObserver
 {
+	string GrtCircuitName();
 	void Reset();
 	float GetMatchProgress();
 	float GetLoopProgress();
 	bool MatchFinish();
-	long GetCircuitTime();
+	/// <returns>返回当前圈的用时(毫秒)</returns>
+	System.TimeSpan GetLoopTime();
+	/// <returns>返回从开始到现在的用时(毫秒)</returns>
+	System.TimeSpan GetMatchTime();
 	float GetCircuitLength();
-	Vector3 GetStartPointPosition();
-	Quaternion GetStartPointRotation();
-	Vector3 GetCircuitWayDirection(float circuitProgress);
+	Vector3 GetStartPointPosition(int rank = 0);
+	Quaternion GetStartPointRotation(int rank = 0);
+	Vector3 GetGuideLinePosition(float loopProgress);
+	Vector3 GetGuideLineDirection(float loopProgress);
 	int GetRank();
-	int GetLoopCount();
+	int GetTotalLoopCount();
+	int GetMaxFinishLoopCount();
 }
