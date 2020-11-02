@@ -45,8 +45,8 @@ public class ArcadeKartAgent : Agent, IInput
 		transform.position = racingObserver.GetStartPointPosition();
 		transform.rotation = racingObserver.GetStartPointRotation();
 
-		arcadeKart.Rigidbody.velocity = Vector3.zero;
-		trainingLog = "Circuit = " + racingObserver.GrtCircuitName() + "\tlength = " + racingObserver.GetCircuitLength() + "\n";
+		arcadeKart.CarRigidbody.velocity = Vector3.zero;
+		trainingLog = "Circuit = " + racingObserver.GetCircuitName() + "\tlength = " + racingObserver.GetCircuitLength() + "\n";
 	}
 
 	public new void AddReward(float increment)
@@ -69,7 +69,7 @@ public class ArcadeKartAgent : Agent, IInput
 		sensor.AddObservation(0.1f);
 
 		// Agent velocity
-		sensor.AddObservation(arcadeKart.Rigidbody.velocity);
+		sensor.AddObservation(arcadeKart.CarRigidbody.velocity);
 
 		// Car forward
 		sensor.AddObservation(arcadeKart.transform.forward);
@@ -102,17 +102,13 @@ public class ArcadeKartAgent : Agent, IInput
 		agentInput.x = vectorAction[0];
 		agentInput.y = vectorAction[1];
 
-		// Reward Speed
-		Vector3 carSpeed = arcadeKart.Speed;
-		Vector3 wayDirection = racingObserver.GetGuideLineDirection(currentLoopProgress);
-		int speedFollow = Vector3.Dot(carSpeed, wayDirection) < 0 ? -5 : 1;
-		AddReward(speedFollow * carSpeed.magnitude);
+		AddReward(arcadeKart.SpeedForwardValue / arcadeKart.baseStats.TopSpeed);
 
 		// Fell off platform
 		if (this.transform.localPosition.y < 0)
 		{
 			Debug.LogWarning("Fell off platform");
-			AddReward(-100);
+			SetReward(-1);
 			EndEpisode();
 		}
 
@@ -121,7 +117,7 @@ public class ArcadeKartAgent : Agent, IInput
 		{
 			TimeSpan matchTime = racingObserver.GetMatchTime();
 			Debug.Log("finish matchTime = " + matchTime);
-			AddReward(racingObserver.GetTotalLoopCount() * racingObserver.GetCircuitLength() * 10 / (float)matchTime.TotalSeconds);
+			SetReward((racingObserver.GetTotalLoopCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / (float)matchTime.TotalSeconds);
 			trainingLog += "finish CircuitTime = \t" + matchTime + "\n";
 			EndEpisode();
 		}
@@ -134,8 +130,8 @@ public class ArcadeKartAgent : Agent, IInput
 
 	public override void Heuristic(float[] actionsOut)
 	{
-		agentInput.x = actionsOut[0];
-		agentInput.y = actionsOut[1];
+		actionsOut[0] = Input.GetAxis("Horizontal");
+		actionsOut[1] = Input.GetAxis("Vertical");
 	}
 
 	void OnCollisionEnter(Collision other)

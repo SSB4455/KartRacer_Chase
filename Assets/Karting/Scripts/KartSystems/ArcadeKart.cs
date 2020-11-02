@@ -60,27 +60,27 @@ namespace KartGame.KartSystems
             [Range(0, 1)]
             public float Suspension;
 
-            // allow for stat adding for powerups.
-            public static Stats operator +(Stats a, Stats b)
-            {
-                return new Stats
-                {
-                    Acceleration        = a.Acceleration + b.Acceleration,
-                    AccelerationCurve   = a.AccelerationCurve + b.AccelerationCurve,
-                    Braking             = a.Braking + b.Braking,
-                    CoastingDrag        = a.CoastingDrag + b.CoastingDrag,
-                    AddedGravity        = a.AddedGravity + b.AddedGravity,
-                    Grip                = a.Grip + b.Grip,
-                    ReverseAcceleration = a.ReverseAcceleration + b.ReverseAcceleration,
-                    ReverseSpeed        = a.ReverseSpeed + b.ReverseSpeed,
-                    TopSpeed            = a.TopSpeed + b.TopSpeed,
-                    Steer               = a.Steer + b.Steer,
-                    Suspension          = a.Suspension + b.Suspension
-                };
-            }
+			// allow for stat adding for powerups.
+			public static Stats operator +(Stats a, Stats b)
+			{
+				return new Stats
+				{
+					Acceleration        = a.Acceleration + b.Acceleration,
+					AccelerationCurve   = a.AccelerationCurve + b.AccelerationCurve,
+					Braking             = a.Braking + b.Braking,
+					CoastingDrag        = a.CoastingDrag + b.CoastingDrag,
+					AddedGravity        = a.AddedGravity + b.AddedGravity,
+					Grip                = a.Grip + b.Grip,
+					ReverseAcceleration = a.ReverseAcceleration + b.ReverseAcceleration,
+					ReverseSpeed        = a.ReverseSpeed + b.ReverseSpeed,
+					TopSpeed            = a.TopSpeed + b.TopSpeed,
+					Steer               = a.Steer + b.Steer,
+					Suspension          = a.Suspension + b.Suspension
+				};
+			}
         }
 
-        public Rigidbody Rigidbody { get; private set; }
+        public Rigidbody CarRigidbody { get; private set; }
         public Vector2 Input       { get; private set; }
         public float AirPercent    { get; private set; }
         public float GroundPercent { get; private set; }
@@ -126,14 +126,14 @@ namespace KartGame.KartSystems
         IInput[] m_Inputs;
 
         // can the kart move?
-        bool canMove = true;
+        bool canDrive = true;
         List<StatPowerup> activePowerupList = new List<StatPowerup>();
         GameObject lastGroundCollided = null;
         ArcadeKart.Stats finalStats;
 
         void Awake()
         {
-            Rigidbody = GetComponent<Rigidbody>();
+            CarRigidbody = GetComponent<Rigidbody>();
             m_Inputs = GetComponents<IInput>();
             suspensionNeutralPos = SuspensionBody.transform.localPosition;
             suspensionNeutralRot = SuspensionBody.transform.localRotation;
@@ -149,7 +149,7 @@ namespace KartGame.KartSystems
             TickPowerups();
 
             // apply our physics properties
-            Rigidbody.centerOfMass = Rigidbody.transform.InverseTransformPoint(CenterOfMass.position);
+            CarRigidbody.centerOfMass = CarRigidbody.transform.InverseTransformPoint(CenterOfMass.position);
 
             // calculate how grounded and airborne we are
             int groundedCount = CountGroundedWheels(out float minHeight);
@@ -158,11 +158,11 @@ namespace KartGame.KartSystems
 
             // gather inputs
             float accel = Input.y;
-            float turn = Input.x;
+            float turn = Mathf.Sign(Input.x) * Mathf.Min(Mathf.Abs(Input.x), 1);
 
             // apply vehicle physics
             GroundVehicle(minHeight);
-            if (canMove)
+            if (canDrive)
             {
                 MoveVehicle(accel, turn);
             }
@@ -278,7 +278,7 @@ namespace KartGame.KartSystems
             // while in the air, fall faster
             if (AirPercent >= 1)
             {
-                Rigidbody.velocity += Physics.gravity * Time.deltaTime * finalStats.AddedGravity;
+                CarRigidbody.velocity += Physics.gravity * Time.deltaTime * finalStats.AddedGravity;
             }
         }
 
@@ -286,16 +286,16 @@ namespace KartGame.KartSystems
         {
             // manual acceleration curve coefficient scalar
             float accelerationCurveCoeff = 5;
-            Vector3 localVel = transform.InverseTransformVector(Rigidbody.velocity);
+            Vector3 localVel = transform.InverseTransformVector(CarRigidbody.velocity);
 
             bool accelDirectionIsFwd = accelInput >= 0;
             bool localVelDirectionIsFwd = localVel.z >= 0;
 
             // use the max speed for the direction we are going--forward or reverse.
             float maxSpeed = accelDirectionIsFwd ? finalStats.TopSpeed : finalStats.ReverseSpeed;
-            float accelPower = accelDirectionIsFwd ? finalStats.Acceleration : finalStats.ReverseAcceleration;
+			float accelPower = accelDirectionIsFwd ? finalStats.Acceleration : finalStats.ReverseAcceleration;
 
-            float accelRampT = Rigidbody.velocity.magnitude / maxSpeed;
+			float accelRampT = CarRigidbody.velocity.magnitude / maxSpeed;
             float multipliedAccelerationCurve = finalStats.AccelerationCurve * accelerationCurveCoeff;
             float accelRamp = Mathf.Lerp(multipliedAccelerationCurve, 1, accelRampT * accelRampT);
 
@@ -310,8 +310,8 @@ namespace KartGame.KartSystems
             // apply inputs to forward/backward
             float turningPower = turnInput * finalStats.Steer;
 
-            Quaternion turnAngle = Quaternion.AngleAxis(turningPower, Rigidbody.transform.up);
-            Vector3 fwd = turnAngle * Rigidbody.transform.forward;
+            Quaternion turnAngle = Quaternion.AngleAxis(turningPower, CarRigidbody.transform.up);
+            Vector3 fwd = turnAngle * CarRigidbody.transform.forward;
 
             Vector3 movement = fwd * accelInput * finalAcceleration * GroundPercent;
 
@@ -319,15 +319,15 @@ namespace KartGame.KartSystems
             fwd.y = Mathf.Lerp(fwd.y, 0, finalStats.Suspension);
 
             // forward movement
-            float currentSpeed = Rigidbody.velocity.magnitude;
+            float currentSpeed = CarRigidbody.velocity.magnitude;
             bool wasOverMaxSpeed = currentSpeed >= maxSpeed;
 
             // if over max speed, cannot accelerate faster.
             if (wasOverMaxSpeed && !isBraking) movement *= 0;
 
-            Vector3 adjustedVelocity = Rigidbody.velocity + movement * Time.deltaTime;
+            Vector3 adjustedVelocity = CarRigidbody.velocity + movement * Time.deltaTime;
 
-            adjustedVelocity.y = Rigidbody.velocity.y;
+            adjustedVelocity.y = CarRigidbody.velocity.y;
 
             //  clamp max speed if we are on ground
             if (GroundPercent > 0)
@@ -343,11 +343,11 @@ namespace KartGame.KartSystems
 
             if (isCoasting)
             {
-                Vector3 restVelocity = new Vector3(0, Rigidbody.velocity.y, 0);
+                Vector3 restVelocity = new Vector3(0, CarRigidbody.velocity.y, 0);
                 adjustedVelocity = Vector3.MoveTowards(adjustedVelocity, restVelocity, Time.deltaTime * finalStats.CoastingDrag);
             }
 
-            Rigidbody.velocity = adjustedVelocity;
+            CarRigidbody.velocity = adjustedVelocity;
 
             ApplyAngularSuspension();
 
@@ -359,19 +359,19 @@ namespace KartGame.KartSystems
 
                 // turning is reversed if we're going in reverse and pressing reverse
                 if (!localVelDirectionIsFwd && !accelDirectionIsFwd) angularVelocitySteering *= -1;
-                var angularVel = Rigidbody.angularVelocity;
+                var angularVel = CarRigidbody.angularVelocity;
 
                 // move the Y angular velocity towards our target
                 angularVel.y = Mathf.MoveTowards(angularVel.y, turningPower * angularVelocitySteering, Time.deltaTime * angularVelocitySmoothSpeed);
 
                 // apply the angular velocity
-                Rigidbody.angularVelocity = angularVel;
+                CarRigidbody.angularVelocity = angularVel;
 
                 // rotate rigidbody's velocity as well to generate immediate velocity redirection
                 // manual velocity steering coefficient
                 float velocitySteering = 25f;
                 // rotate our velocity based on current steer value
-                Rigidbody.velocity = Quaternion.Euler(0f, turningPower * velocitySteering * Time.deltaTime, 0f) * Rigidbody.velocity;
+                CarRigidbody.velocity = Quaternion.Euler(0f, turningPower * velocitySteering * Time.deltaTime, 0f) * CarRigidbody.velocity;
             }
 
             // apply simplified lateral ground friction
@@ -384,12 +384,12 @@ namespace KartGame.KartSystems
                 // it is the direction the wheels are turned, our forward
                 Vector3 latFrictionDirection = Vector3.Cross(fwd, transform.up);
                 // how fast are we currently moving in our friction direction?
-                float latSpeed = Vector3.Dot(Rigidbody.velocity, latFrictionDirection);
+                float latSpeed = Vector3.Dot(CarRigidbody.velocity, latFrictionDirection);
                 // apply the damping
-                Vector3 latFrictionDampedVelocity = Rigidbody.velocity - latFrictionDirection * latSpeed * finalStats.Grip * gripCoeff * Time.deltaTime;
+                Vector3 latFrictionDampedVelocity = CarRigidbody.velocity - latFrictionDirection * latSpeed * finalStats.Grip * gripCoeff * Time.deltaTime;
 
                 // apply the damped velocity
-                Rigidbody.velocity = latFrictionDampedVelocity;
+                CarRigidbody.velocity = latFrictionDampedVelocity;
             }
         }
 
@@ -400,8 +400,8 @@ namespace KartGame.KartSystems
             Vector3 suspendedZ = transform.forward;
             suspendedX.y *= 0f;
             suspendedZ.y *= 0f;
-            var sX = Vector3.Dot(Rigidbody.angularVelocity, suspendedX) * suspendedX;
-            var sZ = Vector3.Dot(Rigidbody.angularVelocity, suspendedZ) * suspendedZ;
+            var sX = Vector3.Dot(CarRigidbody.angularVelocity, suspendedX) * suspendedX;
+            var sZ = Vector3.Dot(CarRigidbody.angularVelocity, suspendedZ) * suspendedZ;
             var sXZ = sX + sZ;
             var sCoeff = 10f;
 
@@ -416,15 +416,15 @@ namespace KartGame.KartSystems
                 suspensionRotation = sXZ * minimumSuspension * sCoeff * Time.deltaTime;
             }
 
-            Vector3 suspendedAngular = Rigidbody.angularVelocity - suspensionRotation;
+            Vector3 suspendedAngular = CarRigidbody.angularVelocity - suspensionRotation;
 
             // apply the adjusted angularvelocity
-            Rigidbody.angularVelocity = suspendedAngular;
+            CarRigidbody.angularVelocity = suspendedAngular;
         }
 
         bool IsStuck()
         {
-            float speed = Rigidbody.velocity.magnitude;
+            float speed = CarRigidbody.velocity.magnitude;
             if(GroundPercent <= 0 && speed < 0.01f && Mathf.Abs(Input.y) > 0)
                 return true;
 
@@ -469,16 +469,16 @@ namespace KartGame.KartSystems
             transform.rotation = Quaternion.Euler(euler);
 		}
 
-		public float SpeedValue
+		public float SpeedForwardValue
 		{
 			get
 			{
-				if (canMove)
+				if (canDrive)
 				{
-					float dot = Vector3.Dot(transform.forward, Rigidbody.velocity);
+					float dot = Vector3.Dot(transform.forward, CarRigidbody.velocity);
 					if (Mathf.Abs(dot) > 0.1f)
 					{
-						float speed = Rigidbody.velocity.magnitude;
+						float speed = CarRigidbody.velocity.magnitude;
 						return dot < 0 ? -(speed / finalStats.ReverseSpeed) : (speed / finalStats.TopSpeed);
 					}
 					return 0f;
@@ -489,11 +489,9 @@ namespace KartGame.KartSystems
 			}
 		}
 
-		public Vector3 Speed { get { return Rigidbody.velocity; } }
-
-        public void SetCanMove(bool move)
+        public void SetCanDrive(bool move)
         {
-            canMove = move;
+            canDrive = move;
         }
     }
 }

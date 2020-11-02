@@ -9,7 +9,7 @@ using UnityEngine;
 
 public interface ICircuitRacingObserver
 {
-	string GrtCircuitName();
+	string GetCircuitName();
 	void Reset();
 	float GetMatchProgress();
 	float GetLoopProgress();

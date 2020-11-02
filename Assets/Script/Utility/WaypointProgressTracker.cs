@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-#pragma warning disable 649
 namespace UnityStandardAssets.Utility
 {
 	public class WaypointProgressTracker : MonoBehaviour, ICircuitRacingObserver
@@ -13,15 +12,6 @@ namespace UnityStandardAssets.Utility
 		// and keeps track of progress and laps.
 
 		[SerializeField] private WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
-
-		[SerializeField] private ProgressStyle progressStyle = ProgressStyle.SmoothAlongRoute;
-		// whether to update the position smoothly along the route (good for curved paths) or just when we reach each waypoint.
-
-		public enum ProgressStyle
-		{
-			SmoothAlongRoute,
-			PointToPoint,
-		}
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
@@ -47,7 +37,7 @@ namespace UnityStandardAssets.Utility
 			Reset();
 		}
 
-		public string GrtCircuitName()
+		public string GetCircuitName()
 		{
 			return circuit.circuitName;
 		}

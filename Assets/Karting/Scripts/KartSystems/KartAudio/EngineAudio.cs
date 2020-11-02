@@ -61,7 +61,7 @@ namespace KartGame.KartSystems
 
         void Update()
         {
-            RPM = arcadeKart != null ? Mathf.Abs(arcadeKart.SpeedValue)  : 0;
+            RPM = arcadeKart != null ? Mathf.Abs(arcadeKart.SpeedForwardValue)  : 0;
             m_DeltaRPM = RPM - m_LastRPM;
 
             //damp the movement of m_LastRPM

@@ -124,7 +124,7 @@ namespace KartGame.KartSystems
             frontLeftWheel.SetToDefaultRotation();
             frontRightWheel.SetToDefaultRotation();
 
-            float speed = kartController.SpeedValue * 10f;
+            float speed = kartController.SpeedForwardValue * 10f;
             float rotationAngle = speed * Time.deltaTime * m_InverseFrontWheelRadius * Mathf.Rad2Deg;
             frontLeftWheel.TurnWheel(rotationAngle);
             frontRightWheel.TurnWheel(rotationAngle);

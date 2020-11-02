@@ -380,7 +380,6 @@ namespace UnityStandardAssets.Utility.Inspector
 			var props = new string[] { "transform", "^", "v", "-" };
 			var widths = new float[] { .7f, .1f, .1f, .1f };
 			float lineHeight = 18;
-			bool changedLength = false;
 
 			// 查找floatArray属性
 			var elements = this.serializedObject.FindProperty("trackTransform");

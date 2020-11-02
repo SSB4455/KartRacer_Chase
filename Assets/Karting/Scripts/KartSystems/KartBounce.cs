@@ -60,7 +60,7 @@ namespace KartGame.KartSystems
             {
                 Vector3 direction = GetDirectionFromAngle(Angles[i], Vector3.up, transform.forward);
 
-                if (Physics.Raycast(origin, direction, out RaycastHit hit, RayDistance, CollisionLayer) && Time.time > resumeTime && !hasCollided && kart.SpeedValue > 0)
+                if (Physics.Raycast(origin, direction, out RaycastHit hit, RayDistance, CollisionLayer) && Time.time > resumeTime && !hasCollided && kart.SpeedForwardValue > 0)
                 {
                     // If the hit normal is pointing up, then we don't want to bounce
                     if (Vector3.Dot(hit.normal, Vector3.up) > 0.2f) 
@@ -76,12 +76,12 @@ namespace KartGame.KartSystems
                     reflectionVector = incidentVector - 2 * Vector3.Dot(incidentVector, hitNormal) * hitNormal;
                     reflectionVector.y = 0;
 
-                    kart.Rigidbody.velocity /= 2;
+                    kart.CarRigidbody.velocity /= 2;
                     // Apply the bounce impulse with the reflectionVector
-                    kart.Rigidbody.AddForce(reflectionVector.normalized * BounceFactor, ForceMode.Impulse);
+                    kart.CarRigidbody.AddForce(reflectionVector.normalized * BounceFactor, ForceMode.Impulse);
 
                     // Mark that the vehicle has collided and the reset time.
-                    kart.SetCanMove(false);
+                    kart.SetCanDrive(false);
                     BounceFlag = hasCollided = true;
                     resumeTime = Time.time + PauseTime;
 
@@ -106,7 +106,7 @@ namespace KartGame.KartSystems
         {
             if (Time.time > resumeTime && hasCollided) 
             {
-                kart.SetCanMove(true);
+                kart.SetCanDrive(true);
                 hasCollided = false;
             }
         }
