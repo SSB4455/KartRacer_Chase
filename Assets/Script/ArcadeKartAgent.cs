@@ -49,7 +49,7 @@ public class ArcadeKartAgent : Agent, IInput
 		trainingLog = "Circuit = " + racingObserver.GetCircuitName() + "\tlength = " + racingObserver.GetCircuitLength() + "\n";
 	}
 
-	public new void AddReward(float increment)
+	/*public new void AddReward(float increment)
 	{
 		trainingLog += "AddReward\t" + DateTime.Now.ToString("HH:mm:ss.fff") + "\t" + increment + "\n";
 		base.AddReward(increment);
@@ -60,7 +60,7 @@ public class ArcadeKartAgent : Agent, IInput
 		File.WriteAllText(Path.Combine(Directory.GetParent(Application.dataPath).ToString(), 
 			"ml-agents_config", "ArcadeKartAgent_training_log_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt"), trainingLog);
 		base.EndEpisode();
-	}
+	}*/
 
 	float currentLoopProgress;
 	public override void CollectObservations(VectorSensor sensor)
@@ -102,7 +102,7 @@ public class ArcadeKartAgent : Agent, IInput
 		agentInput.x = vectorAction[0];
 		agentInput.y = vectorAction[1];
 
-		AddReward(arcadeKart.SpeedForwardValue / arcadeKart.baseStats.TopSpeed);
+		AddReward(arcadeKart.SpeedForwardValue / 10f / arcadeKart.baseStats.TopSpeed);
 
 		// Fell off platform
 		if (this.transform.localPosition.y < 0)
@@ -115,10 +115,10 @@ public class ArcadeKartAgent : Agent, IInput
 		// Match finish reward
 		if (racingObserver.MatchFinish())
 		{
-			TimeSpan matchTime = racingObserver.GetMatchTime();
-			Debug.Log("finish matchTime = " + matchTime);
-			SetReward((racingObserver.GetTotalLoopCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / (float)matchTime.TotalSeconds);
-			trainingLog += "finish CircuitTime = \t" + matchTime + "\n";
+			TimeSpan playingTime = racingObserver.GetMatchTime();
+			Debug.Log("finish playingTime = " + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)");
+			SetReward((racingObserver.GetTotalLoopCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / ((float)playingTime.TotalSeconds * Time.timeScale));
+			trainingLog += "finish CircuitTime = \t" + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)\n";
 			EndEpisode();
 		}
 	}

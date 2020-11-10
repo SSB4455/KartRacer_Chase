@@ -1,0 +1,11 @@
+{
+	"Track": "trainingTrack1",
+	"Training": true,
+	"Players": [
+		{
+			"Name": "",
+			"Car": "ArcadeKart",
+			"AgentMode": "Heuristic"
+		}
+	]
+}

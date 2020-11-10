@@ -11,7 +11,7 @@ namespace UnityStandardAssets.Utility
 		// This script manages the amount to look ahead along the route,
 		// and keeps track of progress and laps.
 
-		[SerializeField] private WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
+		public WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
