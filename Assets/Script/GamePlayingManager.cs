@@ -7,10 +7,12 @@ using System.Collections.Generic;
 using UnityStandardAssets.Utility;
 using System.IO;
 using Unity.MLAgents.Policies;
+using System;
 
 public class GamePlayingManager : MonoBehaviour
 {
 	int gamePlayerCount;
+	public Camera miniMapCamera;
 	public WaypointCircuit[] trackPrefabs;
 	public GameObject arcadeKartPrefab;
 
@@ -21,8 +23,28 @@ public class GamePlayingManager : MonoBehaviour
 	private void Start()
 	{
 		gamePlayerCount = PlayerPrefs.GetInt("", 1);
-		WaypointCircuit circuit = Instantiate<WaypointCircuit>(trackPrefabs[0]);
 
+		string circuitName = "TraningTrack1";
+		WaypointCircuit circuit = null;
+		WaypointCircuit[] waypointCircuits = FindObjectsOfType<WaypointCircuit>();
+		for (int i = 0; i < waypointCircuits?.Length; i++)
+		{
+			if (waypointCircuits[i].circuitName == circuitName)
+			{
+				circuit = waypointCircuits[i];
+			} else {
+				Destroy(waypointCircuits[i].gameObject);
+				waypointCircuits[i] = null;
+			}
+		}
+		if (!circuit)
+		{
+			circuit = Instantiate<WaypointCircuit>(trackPrefabs[0]);
+		}
+		miniMapCamera.transform.position = circuit.trackTransform.position + new Vector3(0, 1000, 0);
+		miniMapCamera.orthographicSize = circuit.orthographicSize;
+
+		Camera carCamera = null;
 		for (int i = 0; i < gamePlayerCount; i++)
 		{
 			GameObject arcadeKart = Instantiate(arcadeKartPrefab);
@@ -30,6 +52,11 @@ public class GamePlayingManager : MonoBehaviour
 			ArcadeKartAgent agent = arcadeKart.GetComponent<ArcadeKartAgent>();
 			if (waypointProgressTracker && agent)
 			{
+				if (carCamera)
+				{
+					carCamera.gameObject.SetActive(false);
+				}
+				carCamera = arcadeKart.GetComponent<Camera>();
 				waypointProgressTracker.circuit = circuit;
 				catList.Add(waypointProgressTracker);
 				BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
@@ -45,15 +72,33 @@ public class GamePlayingManager : MonoBehaviour
 
 	private void Update()
 	{
-		for(int i = 0; i < catList?.Count; i++)
+		/*for(int i = 0; i < catList?.Count; i++)
 		{
 			
-		}
+		}*/
 	}
 
 	//每辆车完成后
 	public void SceneFinish()
 	{
 		
+	}
+
+	internal int GetRank(WaypointProgressTracker car) 
+	{
+		int rank = 1;
+		for (int i = 0; i < catList?.Count; i++)
+		{
+			if (catList[i] != car && catList[i].GetMatchProgress() < car.GetMatchProgress())
+			{
+				rank++;
+			}
+		}
+		return rank;
+	}
+
+	internal int GetRacingCarCount()
+	{
+		return catList == null ? 1 : catList.Count;
 	}
 }

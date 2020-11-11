@@ -11,8 +11,6 @@ namespace UnityStandardAssets.Utility
 	public class TrainingDetailShowUI : MonoBehaviour
 	{
 		public Canvas canvas;
-		public Text circuitNameText;
-		public Text loopTimeText;
 		public ICircuitRacingObserver racingObserver;
 		public Transform obstacleStockpile;
 
@@ -33,8 +31,7 @@ namespace UnityStandardAssets.Utility
 
 		void Update()
 		{
-			circuitNameText.text = "Current Circuit: " + racingObserver.GetCircuitName() + "\tLength: " + racingObserver.GetCircuitLength();
-			loopTimeText.text = "Match Time: " + racingObserver.GetMatchTime().ToString("mm':'ss':'fff") + "\nLap Time: " + racingObserver.GetLoopTime().ToString("mm':'ss':'fff");
+			
 		}
 
 		void AddShowData(DateTime dataTime, float data)

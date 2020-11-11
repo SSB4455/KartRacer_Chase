@@ -10,20 +10,23 @@ using UnityEngine;
 public interface ICircuitRacingObserver
 {
 	string GetCircuitName();
-	void Reset();
-	float GetMatchProgress();
-	float GetLoopProgress();
-	bool MatchFinish();
-	/// <returns>返回当前圈的用时(毫秒)</returns>
-	System.TimeSpan GetLoopTime();
-	/// <returns>返回从开始到现在的用时(毫秒)</returns>
-	System.TimeSpan GetMatchTime();
 	float GetCircuitLength();
+	void Reset();
+	int GetRank();
+	int GetRacingCarCount();
+
 	Vector3 GetStartPointPosition(int rank = 0);
 	Quaternion GetStartPointRotation(int rank = 0);
 	Vector3 GetGuideLinePosition(float loopProgress);
 	Vector3 GetGuideLineDirection(float loopProgress);
-	int GetRank();
-	int GetTotalLoopCount();
-	int GetMaxFinishLoopCount();
+
+	/// <returns>返回从开始到现在的用时(毫秒)</returns>
+	System.TimeSpan GetMatchTime();
+	float GetMatchProgress();
+	int GetTotalLapCount();
+	bool MatchFinish();
+	/// <returns>返回当前圈的用时(毫秒)</returns>
+	System.TimeSpan GetCurrentLapTime();
+	float GetLapProgress();
+	int GetMaxFinishLapCount();
 }

@@ -18,7 +18,8 @@ public class ArcadeKartAgent : Agent, IInput
 	public LayerMask GroundLayers = Physics.DefaultRaycastLayers;
 
 	GameObject lastGroundCollided = null;
-	public int targetRank;
+	public int targetRank = 1;
+	float targetRankNormalized = 0;
 
 	public float hitPenalty = -0.1f;
 
@@ -41,6 +42,7 @@ public class ArcadeKartAgent : Agent, IInput
 	{
 		racingObserver = GetComponent<ICircuitRacingObserver>();
 		racingObserver.Reset();
+		targetRankNormalized = (targetRank - 1) / (float)racingObserver.GetRacingCarCount();
 
 		transform.position = racingObserver.GetStartPointPosition();
 		transform.rotation = racingObserver.GetStartPointRotation();
@@ -86,11 +88,11 @@ public class ArcadeKartAgent : Agent, IInput
 		sensor.AddObservation(racingObserver.GetMatchProgress());
 
 		//当前排名 目标排名
-		sensor.AddObservation(racingObserver.GetRank());
-		sensor.AddObservation(targetRank);
+		sensor.AddObservation((racingObserver.GetRank() - 1) / (float)racingObserver.GetRacingCarCount());
+		sensor.AddObservation(targetRankNormalized);
 
 		// Road forward (current 10m 20m)
-		currentLoopProgress = racingObserver.GetLoopProgress();
+		currentLoopProgress = racingObserver.GetLapProgress();
 		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 0));
 		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 10));
 		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 20));
@@ -117,7 +119,7 @@ public class ArcadeKartAgent : Agent, IInput
 		{
 			TimeSpan playingTime = racingObserver.GetMatchTime();
 			Debug.Log("finish playingTime = " + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)");
-			SetReward((racingObserver.GetTotalLoopCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / ((float)playingTime.TotalSeconds * Time.timeScale));
+			SetReward((racingObserver.GetTotalLapCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / ((float)playingTime.TotalSeconds * Time.timeScale));
 			trainingLog += "finish CircuitTime = \t" + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)\n";
 			EndEpisode();
 		}

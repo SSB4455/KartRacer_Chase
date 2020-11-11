@@ -18,16 +18,12 @@ namespace UnityStandardAssets.Utility
 		public WaypointCircuit.RoutePoint lastInWayRoutePoint { get; private set; }
 
 		DateTime startTime;
-		DateTime loopStartTime;
+		DateTime lapStartTime;
 		TimeSpan matchtTime = TimeSpan.Zero;
-		int loopCount = 1;
-		int finishLoopCount = 0;
-		int maxFinishLoopCount = 0;
-
-		private float progressDistance; // The progress round the route, used in smooth mode.
-		private int progressNum; // the current waypoint number, used in point-to-point mode.
-		private Vector3 lastPosition; // Used to calculate current speed (since we may not have a rigidbody component)
-		private float speed; // current speed of this object (calculated from delta since last frame)
+		int totalLapCount = 1;
+		int finishLapCount = 0;
+		int maxFinishLapCount = 0;
+		internal GamePlayingManager gamePlayingManager;
 
 
 
@@ -45,9 +41,9 @@ namespace UnityStandardAssets.Utility
 		// reset the object to sensible values
 		public void Reset()
 		{
-			finishLoopCount = 0;
+			finishLapCount = 0;
 			startTime = DateTime.Now;
-			loopStartTime = startTime;
+			lapStartTime = startTime;
 			lastInWayRoutePoint = circuit.GetRoutePointByProgress(0);
 			inWayRoutePoint = circuit.GetRoutePoint(transform.position);
 		}
@@ -62,14 +58,14 @@ namespace UnityStandardAssets.Utility
 			return Quaternion.Euler(circuit.GetRoutePointByProgress(0).direction);
 		}
 
-		public int GetMaxFinishLoopCount()
+		public int GetMaxFinishLapCount()
 		{
-			return maxFinishLoopCount;
+			return maxFinishLapCount;
 		}
 
-		public int GetTotalLoopCount()
+		public int GetTotalLapCount()
 		{
-			return loopCount;
+			return totalLapCount;
 		}
 
 		public float GetCircuitLength()
@@ -82,11 +78,11 @@ namespace UnityStandardAssets.Utility
 			inWayRoutePoint = circuit.GetRoutePoint(transform.position);
 			if (lastInWayRoutePoint.percent > 0.8f && inWayRoutePoint.percent < 0.2f)
 			{
-				finishLoopCount++;
-				if (maxFinishLoopCount < finishLoopCount)
+				finishLapCount++;
+				if (maxFinishLapCount < finishLapCount)
 				{
-					maxFinishLoopCount = finishLoopCount;
-					loopStartTime = DateTime.Now;
+					maxFinishLapCount = finishLapCount;
+					lapStartTime = DateTime.Now;
 					if (MatchFinish())
 					{
 						matchtTime = DateTime.Now - startTime;
@@ -95,7 +91,7 @@ namespace UnityStandardAssets.Utility
 			}
 			if (lastInWayRoutePoint.percent < 0.2f && inWayRoutePoint.percent > 0.8f)
 			{
-				finishLoopCount--;
+				finishLapCount--;
 			}
 			lastInWayRoutePoint = inWayRoutePoint;
 			//Debug.Log("finishLoopCount = " + finishLoopCount + "\t LoopProgress = " + GetLoopProgress());
@@ -103,17 +99,17 @@ namespace UnityStandardAssets.Utility
 
 		public float GetMatchProgress()
 		{
-			return finishLoopCount + GetLoopProgress();
+			return (finishLapCount + GetLapProgress()) / totalLapCount;
 		}
 
-		public float GetLoopProgress()
+		public float GetLapProgress()
 		{
-			return (finishLoopCount < 0 ? -1 : 0) + inWayRoutePoint.percent;
+			return (finishLapCount < 0 ? -1 : 0) + inWayRoutePoint.percent;
 		}
 
 		public bool MatchFinish()
 		{
-			return GetTotalLoopCount() <= finishLoopCount;
+			return GetTotalLapCount() <= finishLapCount;
 		}
 
 		public Vector3 GetGuideLinePosition(float loopProgress)
@@ -126,9 +122,9 @@ namespace UnityStandardAssets.Utility
 			return circuit.GetRoutePointByProgress(loopProgress).direction;
 		}
 
-		public TimeSpan GetLoopTime()
+		public TimeSpan GetCurrentLapTime()
 		{
-			return DateTime.Now - loopStartTime;
+			return DateTime.Now - lapStartTime;
 		}
 
 		public TimeSpan GetMatchTime()
@@ -139,7 +135,12 @@ namespace UnityStandardAssets.Utility
 
 		public int GetRank()
 		{
-			return 0;
+			return gamePlayingManager.GetRank(this);
+		}
+
+		public int GetRacingCarCount()
+		{
+			return gamePlayingManager.GetRacingCarCount();
 		}
 
 

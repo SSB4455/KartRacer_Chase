@@ -12,6 +12,7 @@ namespace UnityStandardAssets.Utility
 	{
 		public string circuitName;
 		public Transform trackTransform;
+		public float orthographicSize = 50;
 		[SerializeField] private bool smoothRoute = true;
 		[SerializeField] private int substeps = 10;
 
