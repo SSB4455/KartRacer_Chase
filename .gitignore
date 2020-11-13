@@ -59,4 +59,5 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
-Assets/ML-Agents/Timers/PlayingScene_timers.json
+/Assets/ML-Agents*
+/Assets/ML-Agents/

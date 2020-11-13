@@ -104,7 +104,14 @@ public class ArcadeKartAgent : Agent, IInput
 		agentInput.x = vectorAction[0];
 		agentInput.y = vectorAction[1];
 
-		AddReward(arcadeKart.SpeedForwardValue / 10f / arcadeKart.baseStats.TopSpeed);
+		float carSpeed = arcadeKart.ForwardSpeedValue;
+		if (carSpeed > 0)
+		{
+			carSpeed /= 10f / arcadeKart.baseStats.TopSpeed;
+		} else {
+			carSpeed /= 5f / arcadeKart.baseStats.ReverseSpeed;
+		}
+		AddReward(carSpeed);
 
 		// Fell off platform
 		if (this.transform.localPosition.y < 0)

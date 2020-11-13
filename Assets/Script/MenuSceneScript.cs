@@ -1,18 +1,18 @@
 /*
 SSBB4455 2020-10-19
 */
-using KartGame.KartSystems;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System;
-using System.IO;
+using UnityStandardAssets.Utility;
 
 public class MenuSceneScript : MonoBehaviour
 {
 	public Button[] Buttons;
 	Button[] changeTrackButtons;
-	//var[] trackInfos;
+	public WaypointCircuit[] trackPrefabs;
 
 
 

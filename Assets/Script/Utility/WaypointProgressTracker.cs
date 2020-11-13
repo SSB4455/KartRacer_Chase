@@ -12,6 +12,7 @@ namespace UnityStandardAssets.Utility
 		// and keeps track of progress and laps.
 
 		public WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
+		public KartGame.KartSystems.ArcadeKart arcadeKart;
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
@@ -19,11 +20,12 @@ namespace UnityStandardAssets.Utility
 
 		DateTime startTime;
 		DateTime lapStartTime;
+		TimeSpan bestLapTime = TimeSpan.Zero;
 		TimeSpan matchtTime = TimeSpan.Zero;
-		int totalLapCount = 1;
+		internal int totalLapCount = 1;
 		int finishLapCount = 0;
 		int maxFinishLapCount = 0;
-		internal GamePlayingManager gamePlayingManager;
+		internal GamePlayingManager.IPlayingManager iPlayingManager;
 
 
 
@@ -45,7 +47,7 @@ namespace UnityStandardAssets.Utility
 			startTime = DateTime.Now;
 			lapStartTime = startTime;
 			lastInWayRoutePoint = circuit.GetRoutePointByProgress(0);
-			inWayRoutePoint = circuit.GetRoutePoint(transform.position);
+			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
 		}
 
 		public Vector3 GetStartPointPosition(int rank)
@@ -75,17 +77,22 @@ namespace UnityStandardAssets.Utility
 
 		private void Update()
 		{
-			inWayRoutePoint = circuit.GetRoutePoint(transform.position);
+			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
 			if (lastInWayRoutePoint.percent > 0.8f && inWayRoutePoint.percent < 0.2f)
 			{
 				finishLapCount++;
 				if (maxFinishLapCount < finishLapCount)
 				{
 					maxFinishLapCount = finishLapCount;
+					if (bestLapTime == TimeSpan.Zero || DateTime.Now - lapStartTime < bestLapTime)
+					{
+						bestLapTime = DateTime.Now - lapStartTime;
+					}
 					lapStartTime = DateTime.Now;
 					if (MatchFinish())
 					{
 						matchtTime = DateTime.Now - startTime;
+						iPlayingManager.MatchFinish(this);
 					}
 				}
 			}
@@ -95,6 +102,11 @@ namespace UnityStandardAssets.Utility
 			}
 			lastInWayRoutePoint = inWayRoutePoint;
 			//Debug.Log("finishLoopCount = " + finishLoopCount + "\t LoopProgress = " + GetLoopProgress());
+		}
+
+		public float GetForwardSpeed()
+		{
+			return arcadeKart.ForwardSpeedValue;
 		}
 
 		public float GetMatchProgress()
@@ -109,7 +121,7 @@ namespace UnityStandardAssets.Utility
 
 		public bool MatchFinish()
 		{
-			return GetTotalLapCount() <= finishLapCount;
+			return GetTotalLapCount() <= maxFinishLapCount;
 		}
 
 		public Vector3 GetGuideLinePosition(float loopProgress)
@@ -127,20 +139,25 @@ namespace UnityStandardAssets.Utility
 			return DateTime.Now - lapStartTime;
 		}
 
+		public TimeSpan GetBestLapTime()
+		{
+			return bestLapTime;
+		}
+
 		public TimeSpan GetMatchTime()
 		{
 			//Debug.Log(DateTime.Now + " -> " + startTime);
-			return matchtTime == TimeSpan.Zero ? matchtTime : DateTime.Now - startTime;
+			return matchtTime == TimeSpan.Zero ? DateTime.Now - startTime : matchtTime;
 		}
 
 		public int GetRank()
 		{
-			return gamePlayingManager.GetRank(this);
+			return iPlayingManager.GetRank(this);
 		}
 
 		public int GetRacingCarCount()
 		{
-			return gamePlayingManager.GetRacingCarCount();
+			return iPlayingManager.GetRacingCarCount();
 		}
 
 

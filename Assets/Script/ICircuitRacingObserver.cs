@@ -1,6 +1,7 @@
 /*
 SSBB4455 2020-08-14
 */
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -21,12 +22,15 @@ public interface ICircuitRacingObserver
 	Vector3 GetGuideLineDirection(float loopProgress);
 
 	/// <returns>返回从开始到现在的用时(毫秒)</returns>
-	System.TimeSpan GetMatchTime();
+	TimeSpan GetMatchTime();
 	float GetMatchProgress();
 	int GetTotalLapCount();
 	bool MatchFinish();
 	/// <returns>返回当前圈的用时(毫秒)</returns>
-	System.TimeSpan GetCurrentLapTime();
+	TimeSpan GetCurrentLapTime();
 	float GetLapProgress();
 	int GetMaxFinishLapCount();
+	TimeSpan GetBestLapTime();
+
+	float GetForwardSpeed();
 }

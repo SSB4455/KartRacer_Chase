@@ -1,20 +1,20 @@
 /*
 SSBB4455 2020-10-19
 */
-using UnityEngine;
-using Unity.MLAgents;
-using System.Collections.Generic;
-using UnityStandardAssets.Utility;
-using System.IO;
-using Unity.MLAgents.Policies;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityStandardAssets.Utility;
+using Unity.MLAgents.Policies;
 
-public class GamePlayingManager : MonoBehaviour
+public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingManager
 {
 	int gamePlayerCount;
 	public Camera miniMapCamera;
 	public WaypointCircuit[] trackPrefabs;
 	public GameObject arcadeKartPrefab;
+	//public GameObject gamingUIPrefab;
+	public GamingUI gamingUI;
 
 	List<WaypointProgressTracker> catList = new List<WaypointProgressTracker>();
 
@@ -57,17 +57,21 @@ public class GamePlayingManager : MonoBehaviour
 					carCamera.gameObject.SetActive(false);
 				}
 				carCamera = arcadeKart.GetComponent<Camera>();
+				waypointProgressTracker.iPlayingManager = this;
 				waypointProgressTracker.circuit = circuit;
 				catList.Add(waypointProgressTracker);
 				BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 				if (behaviorParameters)
 				{
-					behaviorParameters.BehaviorType = BehaviorType.InferenceOnly;
+					behaviorParameters.BehaviorType = BehaviorType.HeuristicOnly;
 				}
+				gamingUI.RacingObserver = waypointProgressTracker;
 			} else {
 				Debug.LogError("ArcadeKart " + i + " Instantiate Fail.");
 			}
 		}
+
+		//gamingUI = Instantiate(gamingUIPrefab).GetComponent<GamingUI>();
 	}
 
 	private void Update()
@@ -78,13 +82,18 @@ public class GamePlayingManager : MonoBehaviour
 		}*/
 	}
 
+	public bool MatchFinish(WaypointProgressTracker car)
+	{
+		throw new NotImplementedException();
+	}
+
 	//每辆车完成后
 	public void SceneFinish()
 	{
 		
 	}
 
-	internal int GetRank(WaypointProgressTracker car) 
+	public int GetRank(WaypointProgressTracker car) 
 	{
 		int rank = 1;
 		for (int i = 0; i < catList?.Count; i++)
@@ -97,8 +106,25 @@ public class GamePlayingManager : MonoBehaviour
 		return rank;
 	}
 
-	internal int GetRacingCarCount()
+	public int GetRacingCarCount()
 	{
 		return catList == null ? 1 : catList.Count;
 	}
+
+
+
+
+
+
+	/// <summary>
+	/// 游戏管理 管理所有车辆
+	/// </summary>
+	public interface IPlayingManager
+	{
+		bool MatchFinish(UnityStandardAssets.Utility.WaypointProgressTracker car);
+		int GetRank(UnityStandardAssets.Utility.WaypointProgressTracker car);
+		int GetRacingCarCount();
+	}
+
+
 }

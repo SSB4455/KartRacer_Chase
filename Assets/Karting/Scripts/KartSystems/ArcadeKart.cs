@@ -469,7 +469,7 @@ namespace KartGame.KartSystems
             transform.rotation = Quaternion.Euler(euler);
 		}
 
-		public float SpeedForwardValue
+		public float SpeedValueNormalized
 		{
 			get
 			{
@@ -488,6 +488,8 @@ namespace KartGame.KartSystems
 				}
 			}
 		}
+
+		public float ForwardSpeedValue { get { return Vector3.Dot(transform.forward, CarRigidbody.velocity); } }
 
         public void SetCanDrive(bool move)
         {

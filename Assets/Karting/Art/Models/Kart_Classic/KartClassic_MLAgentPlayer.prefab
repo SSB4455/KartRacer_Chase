@@ -1304,6 +1304,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   circuit: {fileID: 0}
+  arcadeKart: {fileID: 3934862071804020760}
 --- !u!114 &912537976
 MonoBehaviour:
   m_ObjectHideFlags: 0

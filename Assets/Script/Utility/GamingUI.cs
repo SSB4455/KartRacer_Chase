@@ -21,7 +21,7 @@ namespace UnityStandardAssets.Utility
 			set
 			{
 				racingObserver = value;
-				circuitNameText.text = "Current Circuit: " + racingObserver.GetCircuitName() + "\tLength: " + racingObserver.GetCircuitLength();
+				circuitNameText.text = "Circuit: " + racingObserver.GetCircuitName() + "\tLength: " + (int)racingObserver.GetCircuitLength();
 			}
 		}
 
@@ -35,9 +35,12 @@ namespace UnityStandardAssets.Utility
 
 		void Update()
 		{
-			lapTimeText.text = "Match Time: " + racingObserver.GetMatchTime().ToString("mm':'ss':'fff") + "\nLap Time: " + racingObserver.GetCurrentLapTime().ToString("mm':'ss':'fff");
-			rankText.text = "Rank: " + racingObserver.GetRank() + " / " + racingObserver.GetRacingCarCount();
-			//speedText.text = racingObserver.g
+			rankText.text = "Rank: " + racingObserver.GetRank() + " / " + racingObserver.GetRacingCarCount() + 
+				"\tLap: " + racingObserver.GetMaxFinishLapCount() + " / " + racingObserver.GetTotalLapCount();
+			lapTimeText.text = "Match Time: " + racingObserver.GetMatchTime().ToString("mm':'ss':'fff") + 
+				"\nBest Lap Time: " + (racingObserver.GetBestLapTime() == System.TimeSpan.Zero ? "--:--:--" : racingObserver.GetBestLapTime().ToString("mm':'ss':'fff")) +
+				"\nLap Time: " + racingObserver.GetCurrentLapTime().ToString("mm':'ss':'fff");
+			speedText.text = "Speed: " + racingObserver.GetForwardSpeed().ToString("f2");
 		}
 
 
