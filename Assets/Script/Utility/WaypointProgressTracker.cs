@@ -44,6 +44,7 @@ namespace UnityStandardAssets.Utility
 		public void Reset()
 		{
 			finishLapCount = 0;
+			maxFinishLapCount = 0;
 			startTime = DateTime.Now;
 			lapStartTime = startTime;
 			lastInWayRoutePoint = circuit.GetRoutePointByProgress(0);
