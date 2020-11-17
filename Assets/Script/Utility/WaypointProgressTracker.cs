@@ -33,11 +33,14 @@ namespace UnityStandardAssets.Utility
 		private void Start()
 		{
 			Reset();
+
+			//Debug.Log(PlayerPrefs.GetInt("LapBestTime_" + circuit.trackName + arcadeKart.name, 0));
+			bestLapTime = new TimeSpan(PlayerPrefs.GetInt("LapBestTime_" + circuit.trackName + arcadeKart.name, 0));
 		}
 
 		public string GetCircuitName()
 		{
-			return circuit.circuitName;
+			return circuit.trackName;
 		}
 
 		// reset the object to sensible values
@@ -88,7 +91,9 @@ namespace UnityStandardAssets.Utility
 					if (bestLapTime == TimeSpan.Zero || DateTime.Now - lapStartTime < bestLapTime)
 					{
 						bestLapTime = DateTime.Now - lapStartTime;
+						PlayerPrefs.SetInt("LapBestTime_" + circuit.trackName + arcadeKart.name, (int)bestLapTime.Ticks);
 					}
+					Debug.Log("LapTime = " + (DateTime.Now - lapStartTime).Ticks);
 					lapStartTime = DateTime.Now;
 					if (MatchFinish())
 					{

@@ -24,12 +24,13 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 	{
 		gamePlayerCount = PlayerPrefs.GetInt("", 1);
 
-		string circuitName = "TraningTrack1";
+		string trackName = PlayerPrefs.GetString("PlayTrack", "TraningTrack1");
+		Debug.Log("PlayTrack = " + trackName);
 		WaypointCircuit circuit = null;
 		WaypointCircuit[] waypointCircuits = FindObjectsOfType<WaypointCircuit>();
 		for (int i = 0; i < waypointCircuits?.Length; i++)
 		{
-			if (waypointCircuits[i].circuitName == circuitName)
+			if (waypointCircuits[i].trackName == trackName)
 			{
 				circuit = waypointCircuits[i];
 			} else {
@@ -39,7 +40,18 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		}
 		if (!circuit)
 		{
-			circuit = Instantiate<WaypointCircuit>(trackPrefabs[0]);
+			for (int i = 0; i < trackPrefabs?.Length; i++)
+			{
+				if (trackPrefabs[i].trackName == trackName)
+				{
+					circuit = Instantiate<WaypointCircuit>(trackPrefabs[i]);
+					break;
+				}
+			}
+			if (!circuit)
+			{
+				Debug.LogError("未找到赛道 " + trackName);
+			}
 		}
 		miniMapCamera.transform.position = circuit.trackTransform.position + new Vector3(0, 1000, 0);
 		miniMapCamera.orthographicSize = circuit.orthographicSize;
@@ -84,7 +96,8 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 
 	public bool MatchFinish(WaypointProgressTracker car)
 	{
-		throw new NotImplementedException();
+		//throw new NotImplementedException();
+		return true;
 	}
 
 	//每辆车完成后

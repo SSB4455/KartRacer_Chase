@@ -10,7 +10,8 @@ namespace UnityStandardAssets.Utility
 {
 	public class WaypointCircuit : MonoBehaviour
 	{
-		public string circuitName;
+		public string trackName;
+		[SerializeField] internal string trackInfo;
 		public Transform trackTransform;
 		public float orthographicSize = 50;
 		[SerializeField] private bool smoothRoute = true;
@@ -424,6 +425,11 @@ namespace UnityStandardAssets.Utility.Inspector
 			}
 			// 重置缩进
 			EditorGUI.indentLevel--;
+
+			EditorGUILayout.BeginHorizontal();
+			GUILayout.Label("trackInfo");
+			circuit.trackInfo = GUILayout.TextArea(circuit.trackInfo);
+			GUILayout.EndHorizontal();
 
 			
 

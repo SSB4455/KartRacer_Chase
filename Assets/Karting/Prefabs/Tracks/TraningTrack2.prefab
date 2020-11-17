@@ -64,7 +64,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81da62360dd5b1e48804a7be48c05b4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  circuitName: TraningTrack2
+  trackName: TraningTrack2
+  trackInfo: "\u5C0F\u660E\u4ECA\u5E745\u5C81 \u5988\u5988\u4ECA\u5E7430\u5C81 \u4E94\u5E74\u540E\u5988\u5988\u6BD4\u5C0F\u660E\u5927\u51E0\u5C81"
   trackTransform: {fileID: 4391989889372898310}
   orthographicSize: 53
   smoothRoute: 1
