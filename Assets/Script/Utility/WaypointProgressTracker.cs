@@ -61,7 +61,7 @@ namespace UnityStandardAssets.Utility
 
 		public Quaternion GetStartPointRotation(int rank)
 		{
-			return Quaternion.Euler(circuit.GetRoutePointByProgress(0).direction);
+			return Quaternion.FromToRotation(arcadeKart.transform.forward, circuit.GetRoutePointByProgress(0).direction);
 		}
 
 		public int GetMaxFinishLapCount()
@@ -122,7 +122,7 @@ namespace UnityStandardAssets.Utility
 
 		public float GetLapProgress()
 		{
-			return (finishLapCount < 0 ? -1 : 0) + inWayRoutePoint.percent;
+			return inWayRoutePoint.percent;
 		}
 
 		public bool MatchFinish()
