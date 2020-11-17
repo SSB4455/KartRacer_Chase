@@ -17,6 +17,7 @@ public class MenuSceneScript : MonoBehaviour
 	public Button[] Buttons;
 	Button[] changeTrackButtons;
 	public Text trackInfoText;
+	public InputField totalLapCountInputField;
 
 
 
@@ -54,6 +55,7 @@ public class MenuSceneScript : MonoBehaviour
 	public void StartButton()
 	{
 		PlayerPrefs.SetString("PlayTrack", trackObj?.trackName);
+		PlayerPrefs.SetInt("TotalLapCount", int.Parse(totalLapCountInputField.text));
 		UnityEngine.SceneManagement.SceneManager.LoadScene("PlayingScene");
 	}
 }

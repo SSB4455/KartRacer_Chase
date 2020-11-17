@@ -46,6 +46,7 @@ namespace UnityStandardAssets.Utility
 		// reset the object to sensible values
 		public void Reset()
 		{
+			totalLapCount = PlayerPrefs.GetInt("TotalLapCount", 1);
 			finishLapCount = 0;
 			maxFinishLapCount = 0;
 			startTime = DateTime.Now;
