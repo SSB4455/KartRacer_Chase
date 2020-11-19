@@ -25,7 +25,7 @@ namespace UnityStandardAssets.Utility
 
 		void Start()
 		{
-			
+			timeRange = 5;
 			
 		}
 

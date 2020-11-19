@@ -16,13 +16,19 @@ public class MenuSceneScript : MonoBehaviour
 
 	public Button[] Buttons;
 	Button[] changeTrackButtons;
+	public RacerDetailScript racerDetailPrefab;
 	public Text trackInfoText;
 	public InputField totalLapCountInputField;
+	public Button addRacerButton;
+	public GameObject addCarDetailPanel;
+	public Dropdown behaviourTypeDropdown;
 
 
 
 	private void Start()
 	{
+		addCarDetailPanel.gameObject.SetActive(false);
+
 		ChangeTrackButton(0);
 	}
 
@@ -49,7 +55,26 @@ public class MenuSceneScript : MonoBehaviour
 
 	public void AddRacerButton()
 	{
-		
+		addCarDetailPanel.gameObject.SetActive(true);
+		addRacerButton.gameObject.SetActive(false);
+	}
+
+	public void RacerDetailSureButton()
+	{
+		addCarDetailPanel.gameObject.SetActive(false);
+		RacerDetailScript racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
+		racerDetail.carNameText.text = "KartClassic";
+		racerDetail.agentNameText.text = "AI_Racer1";
+		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourTypeDropdown.value].text;
+		PlayerPrefs.SetInt("BehaviorType", behaviourTypeDropdown.value);
+
+		racerDetail.transform.SetParent(addRacerButton.transform.parent);
+	}
+
+	public void RacerDetailCancelButton()
+	{
+		addCarDetailPanel.gameObject.SetActive(false);
+		addRacerButton.gameObject.SetActive(true);
 	}
 
 	public void StartButton()

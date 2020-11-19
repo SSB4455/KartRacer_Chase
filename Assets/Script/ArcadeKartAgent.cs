@@ -67,20 +67,26 @@ public class ArcadeKartAgent : Agent, IInput
 	float currentLoopProgress;
 	public override void CollectObservations(VectorSensor sensor)
 	{
-		// Car type
+		//Car type
 		sensor.AddObservation(0.1f);
 
-		// Agent velocity
+		//Car velocity
 		sensor.AddObservation(arcadeKart.CarRigidbody.velocity);
+		sensor.AddObservation(arcadeKart.ForwardSpeedValue);
 
-		// Car forward
+		//Car forward
 		sensor.AddObservation(arcadeKart.transform.forward);
 
-		// Sensors
+		//Sensors
 		for (int i = 0; i < raycastSensors?.Length; i++)
 		{
 			sensor.AddObservation(raycastSensors[i].GetObservationV1());
 		}
+
+		//当前圈完成进度
+		sensor.AddObservation(racingObserver.GetLapProgress());
+		//单圈占比赛总圈数比例
+		sensor.AddObservation(1f / racingObserver.GetTotalLapCount());
 
 		//比赛完成度 前一辆车比赛完成度 后一辆车比赛完成度
 		sensor.AddObservation(racingObserver.GetMatchProgress());
@@ -91,11 +97,11 @@ public class ArcadeKartAgent : Agent, IInput
 		sensor.AddObservation((racingObserver.GetRank() - 1) / (float)racingObserver.GetRacingCarCount());
 		sensor.AddObservation(targetRankNormalized);
 
-		// Road forward (current 10m 20m)
+		//Road forward (current 10m 20m)
 		currentLoopProgress = racingObserver.GetLapProgress();
 		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 0));
-		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 10));
-		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 20));
+		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 0));//10));
+		sensor.AddObservation(GetGuideLineDirectionObservation(currentLoopProgress, 0));//20));
 	}
 
 	public override void OnActionReceived(float[] vectorAction)
@@ -164,6 +170,12 @@ public class ArcadeKartAgent : Agent, IInput
 		
 	}
 
+	/// <summary>
+	/// 获取包含偏移进度的道路方向的观测变量
+	/// </summary>
+	/// <param name="roadProgress">当前圈行驶进度</param>
+	/// <param name="offset">前后偏移的距离</param>
+	/// <returns></returns>
 	List<float> GetGuideLineDirectionObservation(float roadProgress, float offset)
 	{
 		Vector3 direction = racingObserver.GetGuideLineDirection(roadProgress + (offset / racingObserver.GetCircuitLength()));

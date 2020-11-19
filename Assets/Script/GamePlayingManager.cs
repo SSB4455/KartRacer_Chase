@@ -75,7 +75,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 				BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 				if (behaviorParameters)
 				{
-					behaviorParameters.BehaviorType = BehaviorType.HeuristicOnly;
+					behaviorParameters.BehaviorType = PlayerPrefs.GetInt("BehaviorType", 1) == 1 ? BehaviorType.HeuristicOnly : BehaviorType.InferenceOnly;
 				}
 				gamingUI.RacingObserver = waypointProgressTracker;
 			} else {

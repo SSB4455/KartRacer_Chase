@@ -389,6 +389,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   miniMapCamera: {fileID: 1207105318}
   trackPrefabs:
+  - {fileID: 9066634862559175480, guid: 1104577a8dca93f4fbe1cbc32ef89d82, type: 3}
   - {fileID: 852842274, guid: 3bea81580d1bbb649ab2cb61592e9dc6, type: 3}
   - {fileID: 128277468, guid: 419b6cd587a53ba4c87a957021017bad, type: 3}
   arcadeKartPrefab: {fileID: 3934862071804020761, guid: 5bce91ab2f42c924e9171c2efed10487,

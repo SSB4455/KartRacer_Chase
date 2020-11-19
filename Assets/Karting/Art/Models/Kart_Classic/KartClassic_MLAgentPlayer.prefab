@@ -876,7 +876,7 @@ Transform:
   m_GameObject: {fileID: 3934862070784966188}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0.138, z: 0}
-  m_LocalScale: {x: 0.9708275, y: 0.9708275, z: 0.9708275}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3934862071804020739}
   m_RootOrder: 0
@@ -891,10 +891,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.53341144
-  m_Height: 1.561081
+  m_Radius: 0.5
+  m_Height: 1.6
   m_Direction: 1
-  m_Center: {x: 0, y: -0.16436933, z: 0.07465774}
+  m_Center: {x: 0, y: -0.16, z: 0.075}
 --- !u!1 &3934862070813030018
 GameObject:
   m_ObjectHideFlags: 0
@@ -1350,7 +1350,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 72
+    VectorObservationSize: 75
     NumStackedVectorObservations: 3
     VectorActionSize: 02000000
     VectorActionDescriptions: []
@@ -1552,7 +1552,7 @@ Transform:
   m_GameObject: {fileID: 8731334487767691377}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0.138, z: 0}
-  m_LocalScale: {x: 0.9708275, y: 0.9708275, z: 0.9708275}
+  m_LocalScale: {x: 0.97, y: 0.97, z: 0.97}
   m_Children: []
   m_Father: {fileID: 3934862071804020739}
   m_RootOrder: 1
@@ -1582,9 +1582,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.44
-  m_Height: 0.93081105
+  m_Height: 0.93
   m_Direction: 1
-  m_Center: {x: 0, y: -0.72864807, z: 0.010000011}
+  m_Center: {x: 0, y: -0.73, z: 0.01}
 --- !u!1001 &3385396304648411708
 PrefabInstance:
   m_ObjectHideFlags: 0
