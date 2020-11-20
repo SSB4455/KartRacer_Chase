@@ -20,8 +20,13 @@ public class MenuSceneScript : MonoBehaviour
 	public Text trackInfoText;
 	public InputField totalLapCountInputField;
 	public Button addRacerButton;
+	public Button deleteRacerDetailButton;
 	public GameObject addCarDetailPanel;
+	//public Dropdown behaviourTypeDropdown;
+	//public Dropdown behaviourTypeDropdown;
 	public Dropdown behaviourTypeDropdown;
+	List<RacerDetailScript> racerDetailList = new List<RacerDetailScript>();
+	int racerCountLimit = 2;
 
 
 
@@ -30,6 +35,8 @@ public class MenuSceneScript : MonoBehaviour
 		addCarDetailPanel.gameObject.SetActive(false);
 
 		ChangeTrackButton(0);
+
+		AddRacer("KartClassic", "AI_Racer1", 0);
 	}
 
 	public void ChangeTrackButton(int moveOffset)
@@ -56,22 +63,46 @@ public class MenuSceneScript : MonoBehaviour
 	public void AddRacerButton()
 	{
 		addCarDetailPanel.gameObject.SetActive(true);
-		addRacerButton.gameObject.SetActive(false);
+		deleteRacerDetailButton.gameObject.SetActive(false);
 	}
 
 	public void RacerDetailSureButton()
 	{
 		addCarDetailPanel.gameObject.SetActive(false);
+		PlayerPrefs.SetInt("BehaviorType", behaviourTypeDropdown.value);
+		AddRacer("KartClassic", "AI_Racer1", behaviourTypeDropdown.value);
+	}
+
+	public void AddRacer(string carName, string agentName, int behaviourType)
+	{
 		RacerDetailScript racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
 		racerDetail.carNameText.text = "KartClassic";
 		racerDetail.agentNameText.text = "AI_Racer1";
-		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourTypeDropdown.value].text;
-		PlayerPrefs.SetInt("BehaviorType", behaviourTypeDropdown.value);
-
+		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
+		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
+		racerDetailList.Add(racerDetail);
+
+		if (racerDetailList.Count + 1 > racerCountLimit)
+		{
+			addRacerButton.gameObject.SetActive(false);
+		}
+	}
+
+	public void ChangeRacerDetailButton()
+	{
+		addCarDetailPanel.gameObject.SetActive(true);
+		deleteRacerDetailButton.gameObject.SetActive(true);
+		behaviourTypeDropdown.value = PlayerPrefs.GetInt("BehaviorType", 0);
 	}
 
 	public void RacerDetailCancelButton()
+	{
+		addCarDetailPanel.gameObject.SetActive(false);
+		addRacerButton.gameObject.SetActive(true);
+	}
+
+	public void DeleteRacerDetailButton()
 	{
 		addCarDetailPanel.gameObject.SetActive(false);
 		addRacerButton.gameObject.SetActive(true);
