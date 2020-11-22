@@ -76,8 +76,8 @@ public class MenuSceneScript : MonoBehaviour
 	public void AddRacer(string carName, string agentName, int behaviourType)
 	{
 		RacerDetailScript racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
-		racerDetail.carNameText.text = "KartClassic";
-		racerDetail.agentNameText.text = "AI_Racer1";
+		racerDetail.carNameText.text = carName;
+		racerDetail.agentNameText.text = agentName;
 		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);

@@ -392,6 +392,7 @@ MonoBehaviour:
   - {fileID: 9066634862559175480, guid: 1104577a8dca93f4fbe1cbc32ef89d82, type: 3}
   - {fileID: 852842274, guid: 3bea81580d1bbb649ab2cb61592e9dc6, type: 3}
   - {fileID: 128277468, guid: 419b6cd587a53ba4c87a957021017bad, type: 3}
+  agentModels: []
   arcadeKartPrefab: {fileID: 3934862071804020761, guid: 5bce91ab2f42c924e9171c2efed10487,
     type: 3}
   gamingUI: {fileID: 1247375634}
@@ -4415,7 +4416,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1061867181}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.032182, y: -30.67313, z: 43.391273}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
