@@ -1,7 +1,7 @@
 /*
 SSBB4455 2020-10-19
 */
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -79,6 +79,7 @@ public class MenuSceneScript : MonoBehaviour
 		racerDetail.carNameText.text = carName;
 		racerDetail.agentNameText.text = agentName;
 		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
+		racerDetail.behaviourType = behaviourType;
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
 		racerDetailList.Add(racerDetail);
@@ -110,8 +111,21 @@ public class MenuSceneScript : MonoBehaviour
 
 	public void StartButton()
 	{
-		PlayerPrefs.SetString("PlayTrack", trackObj?.trackName);
-		PlayerPrefs.SetInt("TotalLapCount", int.Parse(totalLapCountInputField.text));
+		Hashtable gameParamJson = new Hashtable();
+		gameParamJson.Add("Track", trackObj?.trackName);
+		gameParamJson.Add("TotalLapCount", int.Parse(totalLapCountInputField.text));
+		ArrayList playerList = new ArrayList();
+		foreach(RacerDetailScript racerDetail in racerDetailList)
+		{
+			Hashtable playerJson = new Hashtable();
+			playerJson.Add("Name", "欧阳双钻");
+			playerJson.Add("Car", racerDetail.carNameText.text);
+			playerJson.Add("AgentModel", racerDetail.agentNameText.text);
+			playerJson.Add("BehaviorType", racerDetail.behaviourType);
+			playerList.Add(playerJson);
+		}
+		gameParamJson.Add("Players", playerList);
+		PlayerPrefs.SetString("GameParam", gameParamJson.toJson());
 		UnityEngine.SceneManagement.SceneManager.LoadScene("PlayingScene");
 	}
 }

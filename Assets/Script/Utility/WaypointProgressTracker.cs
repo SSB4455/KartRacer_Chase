@@ -46,7 +46,6 @@ namespace UnityStandardAssets.Utility
 		// reset the object to sensible values
 		public void Reset()
 		{
-			totalLapCount = PlayerPrefs.GetInt("TotalLapCount", 1);
 			finishLapCount = 0;
 			maxFinishLapCount = 0;
 			startTime = DateTime.Now;
@@ -57,12 +56,13 @@ namespace UnityStandardAssets.Utility
 
 		public Vector3 GetStartPointPosition(int rank)
 		{
-			return circuit.GetRoutePointByProgress(0).position + new Vector3(0, 1, 0);
+			return circuit.GetRoutePointByProgress(0).position + new Vector3(0, 1, 0) + iPlayingManager.GetStartPointPositionOffset(rank);
 		}
 
 		public Quaternion GetStartPointRotation(int rank)
 		{
-			return Quaternion.FromToRotation(arcadeKart.transform.forward, circuit.GetRoutePointByProgress(0).direction);
+			return Quaternion.FromToRotation(arcadeKart.transform.forward, circuit.GetRoutePointByProgress(0).direction)
+				.Add(iPlayingManager.GetStartPointRotationOffset(rank));
 		}
 
 		public int GetMaxFinishLapCount()

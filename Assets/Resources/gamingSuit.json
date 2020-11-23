@@ -1,11 +1,13 @@
 {
 	"Track": "trainingTrack1",
+	"TotalLapCount": 3,
 	"Training": true,
 	"Players": [
 		{
-			"Name": "",
+			"Name": "欧阳双钻",
 			"Car": "ArcadeKart",
-			"AgentMode": "Heuristic"
+			"AgentModel": "AI_Racer1",
+			"BehaviorType": 1
 		}
 	]
 }

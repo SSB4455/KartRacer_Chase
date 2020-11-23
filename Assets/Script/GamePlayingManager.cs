@@ -2,101 +2,114 @@
 SSBB4455 2020-10-19
 */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.Utility;
 using Unity.MLAgents.Policies;
-using System.Collections;
 
 public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingManager
 {
 	public Camera miniMapCamera;
 	public WaypointCircuit[] trackPrefabs;
+	internal WaypointCircuit Track { private set; get; }
 	public Unity.Barracuda.NNModel[] agentModels;
 	public GameObject arcadeKartPrefab;
 	//public GameObject gamingUIPrefab;
 	public GamingUI gamingUI;
 
-	List<WaypointProgressTracker> catList = new List<WaypointProgressTracker>();
-	int GamePlayerCount { get { return catList.Count; } }
+	List<WaypointProgressTracker> carList = new List<WaypointProgressTracker>();
+	int GamePlayerCount { get { return carList.Count; } }
 
 
 
 	private void Start()
 	{
-		string gameSuteJsonString = PlayerPrefs.GetString("GameSute", "{}");
-		Hashtable gameSuteJson = MiniJSON.jsonDecode(gameSuteJsonString) as Hashtable;
-		if (GameSuteJsonCheck(gameSuteJson))
+		string gameParamJsonString = PlayerPrefs.GetString("GameParam", "{}");
+		Hashtable gameParamJson = MiniJSON.jsonDecode(gameParamJsonString) as Hashtable;
+		if (GameSuteJsonCheck(gameParamJson))
 		{
-			string trackName = gameSuteJson["Track"].ToString();
+			string trackName = gameParamJson["Track"].ToString();
 			Debug.Log("PlayTrack = " + trackName);
-			WaypointCircuit circuit = null;
 			WaypointCircuit[] waypointCircuits = FindObjectsOfType<WaypointCircuit>();
 			for (int i = 0; i < waypointCircuits?.Length; i++)
 			{
 				if (waypointCircuits[i].trackName == trackName)
 				{
-					circuit = waypointCircuits[i];
+					Track = waypointCircuits[i];
 				} else {
 					Destroy(waypointCircuits[i].gameObject);
 					waypointCircuits[i] = null;
 				}
 			}
-			if (!circuit)
+			if (!Track)
 			{
 				for (int i = 0; i < trackPrefabs?.Length; i++)
 				{
 					if (trackPrefabs[i].trackName == trackName)
 					{
-						circuit = Instantiate<WaypointCircuit>(trackPrefabs[i]);
+						Track = Instantiate<WaypointCircuit>(trackPrefabs[i]);
 						break;
 					}
 				}
-				if (!circuit)
+				if (!Track)
 				{
 					Debug.LogError("未找到赛道 " + trackName);
 				}
 			}
-			miniMapCamera.transform.position = circuit.trackTransform.position + new Vector3(0, 1000, 0);
-			miniMapCamera.orthographicSize = circuit.orthographicSize;
+			miniMapCamera.transform.position = Track.trackTransform.position + new Vector3(0, 1000, 0);
+			miniMapCamera.orthographicSize = Track.orthographicSize;
 
-			Hashtable playersParamJson = gameSuteJson["Players"] as Hashtable;
-			Camera carCamera = null;
-			foreach (string playerParamKey in playersParamJson.Keys)
+			ArrayList playerList = (ArrayList)gameParamJson["Players"];
+			WaypointProgressTracker showCar = null;
+			for (int i = 0; i < playerList.Count; i++)
 			{
-				Hashtable playerJson = playersParamJson[playerParamKey] as Hashtable;
+				Hashtable playerJson = playerList[i] as Hashtable;
 				GameObject arcadeKart = Instantiate(arcadeKartPrefab);
-				arcadeKart.name = playerJson["Name"].ToString() + "_" + playerJson["Car"].ToString();
+				arcadeKart.name = (string)playerJson["Name"] + "_" + (string)playerJson["Car"];
 				WaypointProgressTracker waypointProgressTracker = arcadeKart.GetComponent<WaypointProgressTracker>();
 				ArcadeKartAgent agent = arcadeKart.GetComponent<ArcadeKartAgent>();
 				if (waypointProgressTracker && agent)
 				{
-					if (carCamera)
-					{
-						carCamera.gameObject.SetActive(false);
-					}
-					carCamera = arcadeKart.GetComponent<Camera>();
 					waypointProgressTracker.iPlayingManager = this;
-					waypointProgressTracker.circuit = circuit;
-					catList.Add(waypointProgressTracker);
+					waypointProgressTracker.circuit = Track;
+					waypointProgressTracker.totalLapCount = (int)(double)gameParamJson["TotalLapCount"];
 					BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 					if (behaviorParameters)
 					{
-						behaviorParameters.BehaviorType = PlayerPrefs.GetInt("BehaviorType", 1) == 1 ? BehaviorType.HeuristicOnly : BehaviorType.InferenceOnly;
+						int playerBehaviorType = (int)(double)playerJson["BehaviorType"];
+						behaviorParameters.BehaviorType = playerBehaviorType == 1 ? BehaviorType.HeuristicOnly : BehaviorType.InferenceOnly;
+						if (playerBehaviorType == 1)
+						{
+							showCar = waypointProgressTracker;
+						}
 					}
-					gamingUI.RacingObserver = waypointProgressTracker;
+					carList.Add(waypointProgressTracker);
+					gamingUI.SetCar(waypointProgressTracker, arcadeKart.GetComponent<Camera>());
 				} else {
-					Debug.LogError("ArcadeKart " + i + " Instantiate Fail.");
+					Debug.LogError(arcadeKart.name + " " + i + " Instantiate Fail.");
 				}
 			}
-
-			
+			gamingUI.ChangeShowCar(showCar);
 		}
+	}
 
+	public Vector3 GetStartPointPositionOffset(int rank)
+	{
+		Vector3 positionOffset = Track.GetRoutePointByProgress(0).position;
+		switch (rank)
+		{
+			case 1: positionOffset.x -= arcadeKartPrefab.GetComponent<Collider>().bounds.size.x * 0.8f; break;
+			case 2: positionOffset.x += arcadeKartPrefab.GetComponent<Collider>().bounds.size.x * 0.8f; break;
 
+		}
+		return positionOffset;
+	}
 
-
-		//gamingUI = Instantiate(gamingUIPrefab).GetComponent<GamingUI>();
+	public Quaternion GetStartPointRotationOffset(int rank)
+	{
+		Quaternion rotationOffset = Quaternion.FromToRotation(arcadeKartPrefab.transform.forward, Track.GetRoutePointByProgress(0).direction);
+		return Quaternion.RotateTowards(rotationOffset, Track.WayCheckPoints[0].rotation, 360);
 	}
 
 	private void Update()
@@ -119,12 +132,16 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		
 	}
 
-	public int GetRank(WaypointProgressTracker car) 
+	public int GetRank(WaypointProgressTracker car)
 	{
-		int rank = 1;
-		for (int i = 0; i < catList?.Count; i++)
+		if (car?.GetMatchTime() == TimeSpan.Zero && carList.Contains(car))
 		{
-			if (catList[i] != car && catList[i].GetMatchProgress() < car.GetMatchProgress())
+			return carList.IndexOf(car) + 1;
+		}
+		int rank = 1;
+		for (int i = 0; i < carList?.Count; i++)
+		{
+			if (carList[i] != car && carList[i].GetMatchProgress() < car?.GetMatchProgress())
 			{
 				rank++;
 			}
@@ -134,14 +151,14 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 
 	public int GetRacingCarCount()
 	{
-		return catList == null ? 1 : catList.Count;
+		return carList == null ? 1 : carList.Count;
 	}
 
 	bool GameSuteJsonCheck(Hashtable gameSuteJson)
 	{
-		if (gameSuteJson?.ContainsKey("Track") && gameSuteJson?.ContainsKey("Players"))
+		if (gameSuteJson != null && gameSuteJson.ContainsKey("Track") && gameSuteJson.ContainsKey("Players"))
 		{
-			if ((gameSuteJson["Players"] as Hashtable)?.Count > 0)
+			if (((ArrayList)gameSuteJson["Players"])?.Count > 0)
 			{
 				return true;
 			}
@@ -162,6 +179,8 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		bool MatchFinish(UnityStandardAssets.Utility.WaypointProgressTracker car);
 		int GetRank(UnityStandardAssets.Utility.WaypointProgressTracker car);
 		int GetRacingCarCount();
+		Vector3 GetStartPointPositionOffset(int rank);
+		Quaternion GetStartPointRotationOffset(int rank);
 	}
 
 
