@@ -31,7 +31,7 @@ namespace UnityStandardAssets.Utility
 		void Update()
 		{
 			rankText.text = "Rank: " + racingObserver.GetRank() + " / " + racingObserver.GetRacingCarCount() + 
-				"\tLap: " + racingObserver.GetMaxFinishLapCount() + " / " + racingObserver.GetTotalLapCount();
+				"\tLap: " + (racingObserver.GetMaxFinishLapCount() + 1) + " / " + racingObserver.GetTotalLapCount();
 			lapTimeText.text = "Match Time: " + racingObserver.GetMatchTime().ToString("mm':'ss':'fff") + 
 				"\nBest Lap Time: " + (racingObserver.GetBestLapTime() == System.TimeSpan.Zero ? "--:--:--" : racingObserver.GetBestLapTime().ToString("mm':'ss':'fff")) +
 				"\nLap Time: " + racingObserver.GetCurrentLapTime().ToString("mm':'ss':'fff");
@@ -53,11 +53,17 @@ namespace UnityStandardAssets.Utility
 		/// <returns>传入车辆在GamingUI的车辆列表中所在的位置 不存在则返回-1</returns>
 		internal int ChangeShowCar(ICircuitRacingObserver racingObserver)
 		{
-			if (carCameras.ContainsKey(racingObserver) && carList.Contains(racingObserver))
+			if (racingObserver != null && carCameras.ContainsKey(racingObserver) && carList.Contains(racingObserver))
 			{
 				this.racingObserver = racingObserver;
 				circuitNameText.text = "Circuit: " + racingObserver.GetCircuitName() + "\tLength: " + (int)racingObserver.GetCircuitLength();
-				return carList.IndexOf(racingObserver);
+				for (int i = 0; i < carList.Count; i++)
+				{
+					carCameras[carList[i]].gameObject.SetActive(false);
+				}
+				carCameras[racingObserver].gameObject.SetActive(true);
+				showCarIndex = carList.IndexOf(racingObserver);
+				return showCarIndex;
 			}
 			return -1;
 		}

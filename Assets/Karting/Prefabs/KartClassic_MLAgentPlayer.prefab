@@ -1216,6 +1216,7 @@ MonoBehaviour:
   RaycastDist: 0.3
   MinHeightThreshold: 0.02
   SuspensionBody: {fileID: 2753088075895370229}
+  bodyCollider: {fileID: 3761148919194163188}
 --- !u!114 &2048534179
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -66,7 +66,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 			{
 				Hashtable playerJson = playerList[i] as Hashtable;
 				GameObject arcadeKart = Instantiate(arcadeKartPrefab);
-				arcadeKart.name = (string)playerJson["Name"] + "_" + (string)playerJson["Car"];
+				arcadeKart.name = (string)playerJson["Name"] + "_" + (string)playerJson["Car"] + "_" + i;
 				WaypointProgressTracker waypointProgressTracker = arcadeKart.GetComponent<WaypointProgressTracker>();
 				ArcadeKartAgent agent = arcadeKart.GetComponent<ArcadeKartAgent>();
 				if (waypointProgressTracker && agent)
@@ -77,15 +77,18 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 					BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 					if (behaviorParameters)
 					{
-						int playerBehaviorType = (int)(double)playerJson["BehaviorType"];
-						behaviorParameters.BehaviorType = playerBehaviorType == 1 ? BehaviorType.HeuristicOnly : BehaviorType.InferenceOnly;
-						if (playerBehaviorType == 1)
+						switch (playerJson["BehaviorType"])
 						{
-							showCar = waypointProgressTracker;
+							case "Heuristic(人工)":
+								behaviorParameters.BehaviorType =BehaviorType.HeuristicOnly;
+								showCar = waypointProgressTracker;
+								break;
+							default: behaviorParameters.BehaviorType = BehaviorType.InferenceOnly; break;
 						}
 					}
 					carList.Add(waypointProgressTracker);
-					gamingUI.SetCar(waypointProgressTracker, arcadeKart.GetComponent<Camera>());
+					waypointProgressTracker.transform.position = 1000 * i * Vector3.one;
+					gamingUI.SetCar(waypointProgressTracker, arcadeKart.GetComponentInChildren<Camera>());
 				} else {
 					Debug.LogError(arcadeKart.name + " " + i + " Instantiate Fail.");
 				}
@@ -94,22 +97,30 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		}
 	}
 
-	public Vector3 GetStartPointPositionOffset(int rank)
+	public Vector3 GetStartPointPosition(WaypointProgressTracker car)
 	{
-		Vector3 positionOffset = Track.GetRoutePointByProgress(0).position;
-		switch (rank)
+		Vector3 startPointPosition = Track.GetRoutePointByProgress(0).position;
+		if (!carList.Contains(car))
 		{
-			case 1: positionOffset.x -= arcadeKartPrefab.GetComponent<Collider>().bounds.size.x * 0.8f; break;
-			case 2: positionOffset.x += arcadeKartPrefab.GetComponent<Collider>().bounds.size.x * 0.8f; break;
-
+			return startPointPosition + new Vector3(0, 1, 0);
 		}
-		return positionOffset;
+		Debug.Log(car.name + " carbodyCollider.x = " + car.arcadeKart.bodyCollider.bounds.size.x);
+		//Debug.Log("trackCollider.x = " + Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size.x);
+		Vector3 offset = Quaternion.Euler(0, -90, 0) * Track.WayCheckPoints[0].forward;
+		int carStartRank = carList.IndexOf(car);
+		float carWidth = car.arcadeKart.bodyCollider.bounds.size.x * 3;
+		float carLength = car.arcadeKart.bodyCollider.bounds.size.y;
+		float horCount = Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size.x / 4 / carWidth;
+		Debug.Log("horizontalCount = " + horCount);
+		int horIndex = carStartRank % (int)horCount;
+		offset *= -carWidth * (horIndex - ((int)horCount / 2) + 0.5f);
+		Debug.Log("offset " + offset);
+		return startPointPosition + offset + new Vector3(0, 1, 0);
 	}
 
-	public Quaternion GetStartPointRotationOffset(int rank)
+	public Quaternion GetStartPointRotation(WaypointProgressTracker car)
 	{
-		Quaternion rotationOffset = Quaternion.FromToRotation(arcadeKartPrefab.transform.forward, Track.GetRoutePointByProgress(0).direction);
-		return Quaternion.RotateTowards(rotationOffset, Track.WayCheckPoints[0].rotation, 360);
+		return Track.WayCheckPoints[0].rotation;
 	}
 
 	private void Update()
@@ -176,11 +187,11 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 	/// </summary>
 	public interface IPlayingManager
 	{
-		bool MatchFinish(UnityStandardAssets.Utility.WaypointProgressTracker car);
-		int GetRank(UnityStandardAssets.Utility.WaypointProgressTracker car);
+		bool MatchFinish(WaypointProgressTracker car);
+		int GetRank(WaypointProgressTracker car);
 		int GetRacingCarCount();
-		Vector3 GetStartPointPositionOffset(int rank);
-		Quaternion GetStartPointRotationOffset(int rank);
+		Vector3 GetStartPointPosition(WaypointProgressTracker car);
+		Quaternion GetStartPointRotation(WaypointProgressTracker car);
 	}
 
 

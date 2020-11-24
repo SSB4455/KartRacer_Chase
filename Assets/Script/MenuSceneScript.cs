@@ -26,7 +26,7 @@ public class MenuSceneScript : MonoBehaviour
 	//public Dropdown behaviourTypeDropdown;
 	public Dropdown behaviourTypeDropdown;
 	List<RacerDetailScript> racerDetailList = new List<RacerDetailScript>();
-	int racerCountLimit = 2;
+	int racerCountLimit = 8;
 
 
 
@@ -36,7 +36,9 @@ public class MenuSceneScript : MonoBehaviour
 
 		ChangeTrackButton(0);
 
-		AddRacer("KartClassic", "AI_Racer1", 0);
+		AddRacer("KartClassic", "AI_Racer1", 1);
+		AddRacer("KartClassic", "AI_Racer1", 1);
+		AddRacer("KartClassic", "AI_Racer1", 1);
 	}
 
 	public void ChangeTrackButton(int moveOffset)
@@ -56,8 +58,7 @@ public class MenuSceneScript : MonoBehaviour
 		currentIndex = currentIndex < 0 ? currentIndex + trackPrefabs.Length : currentIndex;
 
 		trackObj = Instantiate<WaypointCircuit>(trackPrefabs[currentIndex]);
-		trackInfoText.text = "Circuit: " + trackObj.trackName + "\tLength: " + (int)trackObj.CircuitLength + "\n" +
-			trackObj.trackInfo;
+		trackInfoText.text = "Circuit: " + trackObj.trackName + "\tLength: " + (int)trackObj.CircuitLength + "\n" + trackObj.trackInfo;
 	}
 
 	public void AddRacerButton()
@@ -75,53 +76,72 @@ public class MenuSceneScript : MonoBehaviour
 
 	public void AddRacer(string carName, string agentName, int behaviourType)
 	{
-		RacerDetailScript racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
+		RacerDetailScript racerDetail = onChangeRacerDetail;
+		if (racerDetail == null) 
+		{
+			racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
+			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ChangeRacerDetailButton(racerDetail));
+			racerDetailList.Add(racerDetail);
+		}
 		racerDetail.carNameText.text = carName;
 		racerDetail.agentNameText.text = agentName;
 		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
-		racerDetail.behaviourType = behaviourType;
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
-		racerDetailList.Add(racerDetail);
 
-		if (racerDetailList.Count + 1 > racerCountLimit)
-		{
-			addRacerButton.gameObject.SetActive(false);
-		}
+		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
+		onChangeRacerDetail = null;
 	}
 
-	public void ChangeRacerDetailButton()
+	RacerDetailScript onChangeRacerDetail;
+	void ChangeRacerDetailButton(RacerDetailScript racerDetail)
 	{
+		onChangeRacerDetail = racerDetail;
 		addCarDetailPanel.gameObject.SetActive(true);
 		deleteRacerDetailButton.gameObject.SetActive(true);
-		behaviourTypeDropdown.value = PlayerPrefs.GetInt("BehaviorType", 0);
+		int behaviourTypeInt = 0;
+		for (int i = 0; i < behaviourTypeDropdown.options.Count; i++)
+		{
+			if (behaviourTypeDropdown.options[i].text == racerDetail.behaviourTypeText.text)
+			{
+				behaviourTypeInt = i;
+				break;
+			}
+		}
+		behaviourTypeDropdown.value = behaviourTypeInt;
 	}
 
 	public void RacerDetailCancelButton()
 	{
 		addCarDetailPanel.gameObject.SetActive(false);
-		addRacerButton.gameObject.SetActive(true);
+		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
 	}
 
 	public void DeleteRacerDetailButton()
 	{
+		if (onChangeRacerDetail != null)
+		{
+			racerDetailList.Remove(onChangeRacerDetail);
+			Destroy(onChangeRacerDetail.gameObject);
+			onChangeRacerDetail = null;
+		}
 		addCarDetailPanel.gameObject.SetActive(false);
-		addRacerButton.gameObject.SetActive(true);
+		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
 	}
 
 	public void StartButton()
 	{
-		Hashtable gameParamJson = new Hashtable();
-		gameParamJson.Add("Track", trackObj?.trackName);
-		gameParamJson.Add("TotalLapCount", int.Parse(totalLapCountInputField.text));
+		Hashtable gameParamJson = new Hashtable() { 
+			{ "Track", trackObj?.trackName }, 
+			{ "TotalLapCount", int.Parse(totalLapCountInputField.text) } };
 		ArrayList playerList = new ArrayList();
-		foreach(RacerDetailScript racerDetail in racerDetailList)
+		foreach (RacerDetailScript racerDetail in racerDetailList)
 		{
-			Hashtable playerJson = new Hashtable();
-			playerJson.Add("Name", "欧阳双钻");
-			playerJson.Add("Car", racerDetail.carNameText.text);
-			playerJson.Add("AgentModel", racerDetail.agentNameText.text);
-			playerJson.Add("BehaviorType", racerDetail.behaviourType);
+			Hashtable playerJson = new Hashtable() { 
+				{ "Name", "欧阳双钻" }, 
+				{ "Car", racerDetail.carNameText.text },
+				{ "AgentModel", racerDetail.agentNameText.text }, 
+				{ "BehaviorType", racerDetail.behaviourTypeText.text } };
 			playerList.Add(playerJson);
 		}
 		gameParamJson.Add("Players", playerList);

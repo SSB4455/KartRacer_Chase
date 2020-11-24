@@ -117,6 +117,7 @@ namespace KartGame.KartSystems
         public float MinHeightThreshold = 0.02f;
 
         public Transform SuspensionBody;
+		public Collider bodyCollider;
 
         // saved transforms of where the suspension's neutral positions are
         Vector3 suspensionNeutralPos;
@@ -131,7 +132,7 @@ namespace KartGame.KartSystems
         GameObject lastGroundCollided = null;
         ArcadeKart.Stats finalStats;
 
-        void Awake()
+		void Awake()
         {
             CarRigidbody = GetComponent<Rigidbody>();
             m_Inputs = GetComponents<IInput>();

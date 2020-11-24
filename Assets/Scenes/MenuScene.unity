@@ -2155,7 +2155,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1183766172}
-        m_MethodName: RacerDetailSureButton
+        m_MethodName: DeleteRacerDetailButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -6795,11 +6795,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 378801051}
     m_Modifications:
-    - target: {fileID: 6274973629250204171, guid: b5ada388206537d4891b2f452fa01316,
-        type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 1183766172}
     - target: {fileID: 7292031311537832840, guid: b5ada388206537d4891b2f452fa01316,
         type: 3}
       propertyPath: m_Name

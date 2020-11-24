@@ -45,6 +45,7 @@ public class ArcadeKartAgent : Agent, IInput
 		targetRankNormalized = (targetRank - 1) / (float)racingObserver.GetRacingCarCount();
 
 		transform.position = racingObserver.GetStartPointPosition();
+		Debug.Log(name + "position " + transform.position);
 		transform.rotation = racingObserver.GetStartPointRotation();
 
 		arcadeKart.CarRigidbody.velocity = Vector3.zero;

@@ -54,15 +54,14 @@ namespace UnityStandardAssets.Utility
 			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
 		}
 
-		public Vector3 GetStartPointPosition(int rank)
+		public Vector3 GetStartPointPosition()
 		{
-			return circuit.GetRoutePointByProgress(0).position + new Vector3(0, 1, 0) + iPlayingManager.GetStartPointPositionOffset(rank);
+			return iPlayingManager.GetStartPointPosition(this);
 		}
 
-		public Quaternion GetStartPointRotation(int rank)
+		public Quaternion GetStartPointRotation()
 		{
-			return Quaternion.FromToRotation(arcadeKart.transform.forward, circuit.GetRoutePointByProgress(0).direction)
-				.Add(iPlayingManager.GetStartPointRotationOffset(rank));
+			return iPlayingManager.GetStartPointRotation(this);
 		}
 
 		public int GetMaxFinishLapCount()
