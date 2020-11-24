@@ -549,7 +549,6 @@ GameObject:
   - component: {fileID: 1850217731}
   - component: {fileID: 1850217734}
   - component: {fileID: 1850217733}
-  - component: {fileID: 1850217732}
   m_Layer: 15
   m_Name: MiniMapMark
   m_TagString: Untagged
@@ -616,20 +615,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!136 &1850217732
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1850217730}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2089878884
 GameObject:
   m_ObjectHideFlags: 0
@@ -1651,9 +1636,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 305a556307b36464395aa157cffcd3db, type: 3}
---- !u!4 &3385396304648274104 stripped
+--- !u!4 &3385396304648274100 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400004, guid: 305a556307b36464395aa157cffcd3db,
+  m_CorrespondingSourceObject: {fileID: 400008, guid: 305a556307b36464395aa157cffcd3db,
     type: 3}
   m_PrefabInstance: {fileID: 3385396304648411708}
   m_PrefabAsset: {fileID: 0}
@@ -1663,9 +1648,9 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3385396304648411708}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &3385396304648274100 stripped
+--- !u!4 &3385396304648274104 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400008, guid: 305a556307b36464395aa157cffcd3db,
+  m_CorrespondingSourceObject: {fileID: 400004, guid: 305a556307b36464395aa157cffcd3db,
     type: 3}
   m_PrefabInstance: {fileID: 3385396304648411708}
   m_PrefabAsset: {fileID: 0}

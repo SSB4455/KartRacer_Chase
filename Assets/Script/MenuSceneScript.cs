@@ -26,7 +26,7 @@ public class MenuSceneScript : MonoBehaviour
 	//public Dropdown behaviourTypeDropdown;
 	public Dropdown behaviourTypeDropdown;
 	List<RacerDetailScript> racerDetailList = new List<RacerDetailScript>();
-	int racerCountLimit = 8;
+	int racerCountLimit = 2;
 
 
 
@@ -36,8 +36,6 @@ public class MenuSceneScript : MonoBehaviour
 
 		ChangeTrackButton(0);
 
-		AddRacer("KartClassic", "AI_Racer1", 1);
-		AddRacer("KartClassic", "AI_Racer1", 1);
 		AddRacer("KartClassic", "AI_Racer1", 1);
 	}
 
@@ -87,6 +85,7 @@ public class MenuSceneScript : MonoBehaviour
 		racerDetail.agentNameText.text = agentName;
 		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
+		racerDetail.transform.localScale = Vector3.one;
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
 
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);

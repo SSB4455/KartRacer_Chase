@@ -87,7 +87,6 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 						}
 					}
 					carList.Add(waypointProgressTracker);
-					waypointProgressTracker.transform.position = 1000 * i * Vector3.one;
 					gamingUI.SetCar(waypointProgressTracker, arcadeKart.GetComponentInChildren<Camera>());
 				} else {
 					Debug.LogError(arcadeKart.name + " " + i + " Instantiate Fail.");
@@ -104,17 +103,17 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		{
 			return startPointPosition + new Vector3(0, 1, 0);
 		}
-		Debug.Log(car.name + " carbodyCollider.x = " + car.arcadeKart.bodyCollider.bounds.size.x);
-		//Debug.Log("trackCollider.x = " + Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size.x);
+		//Debug.Log(car.name + " carbodyCollider.x = " + car.arcadeKart.bodyCollider.bounds.size.x);
+		Debug.Log("trackCollider width = " + Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size.z);
 		Vector3 offset = Quaternion.Euler(0, -90, 0) * Track.WayCheckPoints[0].forward;
 		int carStartRank = carList.IndexOf(car);
-		float carWidth = car.arcadeKart.bodyCollider.bounds.size.x * 3;
-		float carLength = car.arcadeKart.bodyCollider.bounds.size.y;
-		float horCount = Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size.x / 4 / carWidth;
-		Debug.Log("horizontalCount = " + horCount);
-		int horIndex = carStartRank % (int)horCount;
-		offset *= -carWidth * (horIndex - ((int)horCount / 2) + 0.5f);
-		Debug.Log("offset " + offset);
+		float carWidth = car.arcadeKart.bodyCollider.bounds.size.x * 2;
+		float carLength = car.arcadeKart.bodyCollider.bounds.size.y * 3;
+		int horCount = (int)((Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size.z - 2) / carWidth);
+		int horIndex = carStartRank % horCount;
+		offset *= -carWidth * (horIndex - (horCount / 2f) + 0.5f);
+		offset -= Track.WayCheckPoints[0].forward * (carStartRank / horCount) * carLength;
+		//Debug.Log("offset " + offset);
 		return startPointPosition + offset + new Vector3(0, 1, 0);
 	}
 
