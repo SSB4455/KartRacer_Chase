@@ -7,7 +7,7 @@
 			"Name": "欧阳双钻",
 			"Car": "ArcadeKart",
 			"AgentModel": "AI_Racer1",
-			"BehaviorType": 1
+			"BehaviorType": "Heuristic(人工)"
 		}
 	]
 }
