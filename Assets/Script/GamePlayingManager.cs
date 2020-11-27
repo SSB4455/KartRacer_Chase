@@ -77,6 +77,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 					BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 					if (behaviorParameters)
 					{
+						behaviorParameters.TeamId = i;
 						switch (playerJson["BehaviorType"])
 						{
 							case "Heuristic(人工)":
@@ -110,10 +111,10 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		float carLength = car.arcadeKart.bodyCollider.bounds.size.y * 3;
 		float trackWidth = Mathf.Abs(Vector3.Dot(horiForward, Track.WayCheckPoints[0].GetComponent<Collider>().bounds.size));
 		//Debug.Log("trackCollider width = " + trackWidth);
-		int horCount = (int)((trackWidth - 2) / carWidth);
-		int horIndex = carStartRank % horCount;
-		Vector3 offset = horiForward * -carWidth * (horIndex - (horCount / 2f) + 0.5f);
-		offset -= Track.WayCheckPoints[0].forward * (carStartRank / horCount) * carLength;
+		int horiCarCount = (int)((trackWidth - 2) / carWidth);
+		int carHoriIndex = carStartRank % horiCarCount;
+		Vector3 offset = horiForward * -carWidth * (carHoriIndex - (horiCarCount / 2f) + 0.5f);
+		offset -= Track.WayCheckPoints[0].forward * (carStartRank / horiCarCount) * carLength;
 		//Debug.Log("offset " + offset);
 		return startPointPosition + offset + new Vector3(0, 1, 0);
 	}

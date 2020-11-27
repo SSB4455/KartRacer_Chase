@@ -63,6 +63,14 @@ public class MenuSceneScript : MonoBehaviour
 	{
 		addCarDetailPanel.gameObject.SetActive(true);
 		deleteRacerDetailButton.gameObject.SetActive(false);
+		for (int i = 0; i < racerDetailList?.Count; i++)
+		{
+			if (racerDetailList[i].behaviourTypeText.text == behaviourTypeDropdown.options[1].text)
+			{       //只能有1个人工操作的车手
+				behaviourTypeDropdown.options.RemoveAt(1);
+				break;
+			}
+		}
 	}
 
 	public void RacerDetailSureButton()
