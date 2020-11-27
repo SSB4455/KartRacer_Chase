@@ -21,7 +21,7 @@ namespace UnityStandardAssets.Utility
 		DateTime startTime;
 		DateTime lapStartTime;
 		TimeSpan bestLapTime = TimeSpan.Zero;
-		TimeSpan matchtTime = TimeSpan.Zero;
+		TimeSpan matchFinishTime = TimeSpan.Zero;
 		internal int totalLapCount = 1;
 		int finishLapCount = 0;
 		int maxFinishLapCount = 0;
@@ -50,6 +50,7 @@ namespace UnityStandardAssets.Utility
 			maxFinishLapCount = 0;
 			startTime = DateTime.Now;
 			lapStartTime = startTime;
+			matchFinishTime = TimeSpan.Zero;
 			lastInWayRoutePoint = circuit.GetRoutePointByProgress(0);
 			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
 		}
@@ -97,7 +98,7 @@ namespace UnityStandardAssets.Utility
 					lapStartTime = DateTime.Now;
 					if (MatchFinish())
 					{
-						matchtTime = DateTime.Now - startTime;
+						matchFinishTime = DateTime.Now - startTime;
 						iPlayingManager.MatchFinish(this);
 					}
 				}
@@ -153,7 +154,7 @@ namespace UnityStandardAssets.Utility
 		public TimeSpan GetMatchTime()
 		{
 			//Debug.Log(DateTime.Now + " -> " + startTime);
-			return matchtTime == TimeSpan.Zero ? DateTime.Now - startTime : matchtTime;
+			return matchFinishTime == TimeSpan.Zero ? DateTime.Now - startTime : matchFinishTime;
 		}
 
 		public int GetRank()

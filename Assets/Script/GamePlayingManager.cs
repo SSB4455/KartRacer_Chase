@@ -84,7 +84,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 								behaviorParameters.BehaviorType =BehaviorType.HeuristicOnly;
 								showCar = waypointProgressTracker;
 								break;
-							default: behaviorParameters.BehaviorType = BehaviorType.InferenceOnly; break;
+							default: behaviorParameters.BehaviorType = BehaviorType.Default; break;
 						}
 					}
 					carList.Add(waypointProgressTracker);

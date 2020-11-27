@@ -71,12 +71,12 @@ public class ArcadeKartAgent : Agent, IInput
 		//Car type
 		sensor.AddObservation(0.1f);
 
+		//Car forward
+		sensor.AddObservation(arcadeKart.transform.forward);
+
 		//Car velocity
 		sensor.AddObservation(arcadeKart.CarRigidbody.velocity);
 		sensor.AddObservation(arcadeKart.ForwardSpeedValue);
-
-		//Car forward
-		sensor.AddObservation(arcadeKart.transform.forward);
 
 		//Sensors
 		for (int i = 0; i < raycastSensors?.Length; i++)
@@ -135,6 +135,14 @@ public class ArcadeKartAgent : Agent, IInput
 			Debug.Log("finish playingTime = " + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)");
 			SetReward((racingObserver.GetTotalLapCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / ((float)playingTime.TotalSeconds * Time.timeScale));
 			trainingLog += "finish CircuitTime = \t" + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)\n";
+			EndEpisode();
+		}
+
+		// 倒着开的惩罚
+		if (racingObserver.GetMatchProgress() < 0)
+		{
+			Debug.Log("倒着开过了起点");
+			SetReward(-1);
 			EndEpisode();
 		}
 	}
