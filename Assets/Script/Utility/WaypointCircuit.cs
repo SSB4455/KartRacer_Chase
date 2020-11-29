@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -23,6 +25,26 @@ namespace UnityStandardAssets.Utility
 		internal int InwayPointsCount { get { return inWayPoints.Length; } }
 		[SerializeField] int[] optimizedIndices;
 		internal float CircuitLength { get; private set; }
+		public string Id
+		{
+			get
+			{
+				MD5 md5 = MD5.Create();
+				string str = trackName;
+				for (int i = 0; i < wayCheckPoints.Length; i++)
+				{
+					str += wayCheckPoints[i].name + wayCheckPoints[i].position + wayCheckPoints[i].localScale + wayCheckPoints[i].rotation;
+				}
+				byte[] byteOld = Encoding.UTF8.GetBytes(str);
+				byte[] byteNew = md5.ComputeHash(byteOld);
+				StringBuilder sb = new StringBuilder();
+				foreach (byte b in byteNew)
+				{
+					sb.Append(b.ToString("x2"));
+				}
+				return sb.ToString();
+			}
+		}
 
 
 

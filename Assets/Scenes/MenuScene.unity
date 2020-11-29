@@ -3992,10 +3992,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 715f6c12178c580438da112cc666484b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackPreviewCamera: {fileID: 1408908918}
   trackPrefabs:
   - {fileID: 9066634862559175480, guid: 1104577a8dca93f4fbe1cbc32ef89d82, type: 3}
   - {fileID: 852842274, guid: 3bea81580d1bbb649ab2cb61592e9dc6, type: 3}
   - {fileID: 128277468, guid: 419b6cd587a53ba4c87a957021017bad, type: 3}
+  - {fileID: 8539759235001672328, guid: c1465277406c31d4f95e76f5f908a3d4, type: 3}
   Buttons: []
   racerDetailPrefab: {fileID: 2990768307370364165, guid: b5ada388206537d4891b2f452fa01316,
     type: 3}

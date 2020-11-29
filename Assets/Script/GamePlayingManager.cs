@@ -58,7 +58,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 				}
 			}
 			miniMapCamera.transform.position = Track.trackTransform.position + new Vector3(0, 1000, 0);
-			miniMapCamera.orthographicSize = Track.orthographicSize;
+			miniMapCamera.orthographicSize = Track.orthographicSize * (16f / 9) / miniMapCamera.aspect;
 
 			ArrayList playerList = (ArrayList)gameParamJson["Players"];
 			WaypointProgressTracker showCar = null;

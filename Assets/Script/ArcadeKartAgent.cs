@@ -38,6 +38,14 @@ public class ArcadeKartAgent : Agent, IInput
 
 
 
+	private void Start()
+	{
+		if (Application.isMobilePlatform)
+		{
+			Debug.Log("isMobilePlatform");
+		}
+	}
+
 	public override void OnEpisodeBegin()
 	{
 		racingObserver = GetComponent<ICircuitRacingObserver>();

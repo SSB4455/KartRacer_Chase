@@ -10,6 +10,7 @@ using UnityStandardAssets.Utility;
 
 public class MenuSceneScript : MonoBehaviour
 {
+	public Camera trackPreviewCamera;
 	public WaypointCircuit[] trackPrefabs;
 	int currentIndex = 0;
 	WaypointCircuit trackObj;
@@ -33,6 +34,7 @@ public class MenuSceneScript : MonoBehaviour
 	private void Start()
 	{
 		addCarDetailPanel.gameObject.SetActive(false);
+		trackPreviewCamera.fieldOfView *= (16f / 9) / Camera.main.aspect;
 
 		ChangeTrackButton(0);
 
