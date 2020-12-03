@@ -15,9 +15,12 @@ namespace UnityStandardAssets.Utility
 		public Text lapTimeText;
 		public Text rankText;
 		public Text speedText;
+		//Joystick reference for assign in inspector
+		[SerializeField] private bl_Joystick joystick;
 		
 		ICircuitRacingObserver racingObserver;
 		Dictionary<ICircuitRacingObserver, Camera> carCameras = new Dictionary<ICircuitRacingObserver, Camera>();
+		Dictionary<ICircuitRacingObserver, ArcadeKartAgent> carAgents = new Dictionary<ICircuitRacingObserver, ArcadeKartAgent>();
 		List<ICircuitRacingObserver> carList = new List<ICircuitRacingObserver>();
 
 
@@ -43,6 +46,7 @@ namespace UnityStandardAssets.Utility
 			this.racingObserver = racingObserver;
 			carList.Add(racingObserver);
 			carCameras.Add(racingObserver, carCamera);
+			carAgents.Add(racingObserver, carCamera.GetComponentInParent<ArcadeKartAgent>());
 			ChangeShowCar(racingObserver);
 		}
 
@@ -60,8 +64,10 @@ namespace UnityStandardAssets.Utility
 				for (int i = 0; i < carList.Count; i++)
 				{
 					carCameras[carList[i]].gameObject.SetActive(false);
+					carAgents[carList[i]].joystick = null;
 				}
 				carCameras[racingObserver].gameObject.SetActive(true);
+				carAgents[racingObserver].joystick = joystick;
 				showCarIndex = carList.IndexOf(racingObserver);
 				return showCarIndex;
 			}

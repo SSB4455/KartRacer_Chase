@@ -81,7 +81,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 						switch (playerJson["BehaviorType"])
 						{
 							case "Heuristic(人工)":
-								behaviorParameters.BehaviorType =BehaviorType.HeuristicOnly;
+								behaviorParameters.BehaviorType = BehaviorType.HeuristicOnly;
 								showCar = waypointProgressTracker;
 								break;
 							default: behaviorParameters.BehaviorType = BehaviorType.Default; break;

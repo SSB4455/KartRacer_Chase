@@ -14,6 +14,7 @@ public class ArcadeKartAgent : Agent, IInput
 	public ArcadeKart arcadeKart;
 	ICircuitRacingObserver racingObserver;
 	Vector2 agentInput = new Vector2();
+	internal bl_Joystick joystick;
 	[Tooltip("Which layers the wheels will detect.")]
 	public LayerMask GroundLayers = Physics.DefaultRaycastLayers;
 
@@ -40,10 +41,6 @@ public class ArcadeKartAgent : Agent, IInput
 
 	private void Start()
 	{
-		if (Application.isMobilePlatform)
-		{
-			Debug.Log("isMobilePlatform");
-		}
 	}
 
 	public override void OnEpisodeBegin()
@@ -164,6 +161,13 @@ public class ArcadeKartAgent : Agent, IInput
 	{
 		actionsOut[0] = Input.GetAxis("Horizontal");
 		actionsOut[1] = Input.GetAxis("Vertical");
+
+		if (Application.isMobilePlatform && joystick)
+		{
+			actionsOut[0] = joystick.Horizontal / 5;
+			actionsOut[1] = joystick.Vertical / 5;
+		}
+		//Debug.Log("actionsOut " + actionsOut[0] + " " + actionsOut[1]);
 	}
 
 	void OnCollisionEnter(Collision other)
