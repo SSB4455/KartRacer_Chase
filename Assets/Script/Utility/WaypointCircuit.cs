@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -29,7 +28,7 @@ namespace UnityStandardAssets.Utility
 		{
 			get
 			{
-				MD5 md5 = MD5.Create();
+				System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 				string str = trackName;
 				for (int i = 0; i < wayCheckPoints.Length; i++)
 				{

@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace UnityStandardAssets.Utility
@@ -26,6 +28,9 @@ namespace UnityStandardAssets.Utility
 		int finishLapCount = 0;
 		int maxFinishLapCount = 0;
 		internal GamePlayingManager.IPlayingManager iPlayingManager;
+		public bool record = true;
+		bool recording = true;
+		StringBuilder playRecordString;
 
 
 
@@ -53,6 +58,27 @@ namespace UnityStandardAssets.Utility
 			matchFinishTime = TimeSpan.Zero;
 			lastInWayRoutePoint = circuit.GetRoutePointByProgress(0);
 			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
+
+			if (record)
+			{
+				playRecordString = new StringBuilder();
+				playRecordString.Append("PlayTime\t").AppendLine(DateTime.Now.Ticks.ToString());
+				playRecordString.Append("TimeScale\t").AppendLine(Time.timeScale.ToString());
+				playRecordString.Append("CircuitName\t").AppendLine(circuit.trackName);
+				playRecordString.Append("CircuitId\t").AppendLine(circuit.Id);
+				//playRecordString.Append("CircuitVersion\t").AppendLine(circuit.Version);
+				playRecordString.Append("CircuitLength\t").AppendLine(circuit.CircuitLength.ToString());
+				playRecordString.Append("PlayerName\t").AppendLine(arcadeKart.name);
+				playRecordString.Append("CarName\t").AppendLine(arcadeKart.name);
+				//playRecordString.Append("AgentName\t").AppendLine(AgentName);
+				//playRecordString.Append("AgentValueMD5\t").AppendLine(AgentValueMD5);
+				//playRecordString.Append("BehaviorType\t").AppendLine(BehaviorType);
+				playRecordString.Append("TotalLapCount\t").AppendLine(totalLapCount.ToString());
+				//playRecordString.Append("MatchId\t").AppendLine(iPlayingManager.GetMatchId());
+				playRecordString.Append("TotalCarCount\t").AppendLine(iPlayingManager.GetRacingCarCount().ToString());
+				playRecordString.Append("CircuitPosition").Append(circuit.trackTransform.position.ToString().Replace('(', '\t').Replace(')', '\n'));
+				recording = true;
+			}
 		}
 
 		public Vector3 GetStartPointPosition()
@@ -83,6 +109,13 @@ namespace UnityStandardAssets.Utility
 		private void Update()
 		{
 			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
+			if (recording)
+			{
+				playRecordString.Append("CarPosition\t").Append(GetMatchTime().Ticks).
+					Append(arcadeKart.transform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\t')).
+					Append(GetMatchProgress().ToString("f4")).
+					Append(arcadeKart.CarRigidbody.velocity.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\n'));
+			}
 			if (lastInWayRoutePoint.percent > 0.8f && inWayRoutePoint.percent < 0.2f)
 			{
 				finishLapCount++;
@@ -96,10 +129,22 @@ namespace UnityStandardAssets.Utility
 					}
 					Debug.Log("LapTime = " + (DateTime.Now - lapStartTime).Ticks);
 					lapStartTime = DateTime.Now;
-					if (MatchFinish())
+					if (matchFinishTime == TimeSpan.Zero && MatchFinish())
 					{
 						matchFinishTime = DateTime.Now - startTime;
 						iPlayingManager.MatchFinish(this);
+						if (recording)
+						{
+							recording = false;
+							playRecordString.Append("FinishCircuitTime\t").Append(GetMatchTime().Ticks).Append('\t').Append(GetMatchTime());
+							string recordFilePath = Path.Combine(Application.persistentDataPath, "ml-agents_config",
+								"ArcadeKartAgent_playRecord_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt");
+#if UNITY_EDITOR
+							recordFilePath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "ml-agents_config", 
+								"ArcadeKartAgent_playRecord_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt");
+#endif
+							File.WriteAllText(recordFilePath, playRecordString.ToString());
+						}
 					}
 				}
 			}
