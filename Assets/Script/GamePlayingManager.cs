@@ -74,6 +74,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 					waypointProgressTracker.iPlayingManager = this;
 					waypointProgressTracker.circuit = Track;
 					waypointProgressTracker.totalLapCount = (int)(double)gameParamJson["TotalLapCount"];
+					waypointProgressTracker.record = (bool)gameParamJson["PlayRecord"];;
 					BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 					if (behaviorParameters)
 					{

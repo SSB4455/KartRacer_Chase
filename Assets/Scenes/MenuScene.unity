@@ -3892,12 +3892,12 @@ GameObject:
   - component: {fileID: 1160615220}
   - component: {fileID: 1160615221}
   m_Layer: 5
-  m_Name: Toggle (1)
+  m_Name: SavePlayRecordToggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1160615220
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3998,12 +3998,12 @@ MonoBehaviour:
   - {fileID: 852842274, guid: 3bea81580d1bbb649ab2cb61592e9dc6, type: 3}
   - {fileID: 128277468, guid: 419b6cd587a53ba4c87a957021017bad, type: 3}
   - {fileID: 8539759235001672328, guid: c1465277406c31d4f95e76f5f908a3d4, type: 3}
-  Buttons: []
   racerDetailPrefab: {fileID: 2990768307370364165, guid: b5ada388206537d4891b2f452fa01316,
     type: 3}
   trackInfoText: {fileID: 1541189574}
   totalLapCountInputField: {fileID: 1756248992}
   addRacerButton: {fileID: 1601412821}
+  playRecordToggle: {fileID: 1160615221}
   deleteRacerDetailButton: {fileID: 537804878}
   addCarDetailPanel: {fileID: 1038013063}
   behaviourTypeDropdown: {fileID: 694435374}
@@ -6152,7 +6152,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u8BAD\u7EC3\u6216\u8FD0\u884C"
+  m_Text: "\u662F\u5426\u4FDD\u5B58\u884C\u9A76\u8BB0\u5F55"
 --- !u!222 &1940739138
 CanvasRenderer:
   m_ObjectHideFlags: 0

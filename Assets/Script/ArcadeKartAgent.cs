@@ -33,8 +33,6 @@ public class ArcadeKartAgent : Agent, IInput
 	[Header("Debug Option")]
 	[Tooltip("Should we visualize the rays that the agent draws?")]
 	public bool ShowRaycasts;
-
-	string trainingLog;
 #endregion
 
 
@@ -54,7 +52,6 @@ public class ArcadeKartAgent : Agent, IInput
 		transform.rotation = racingObserver.GetStartPointRotation();
 
 		arcadeKart.CarRigidbody.velocity = Vector3.zero;
-		trainingLog = "Circuit = " + racingObserver.GetCircuitName() + "\tlength = " + racingObserver.GetCircuitLength() + "\n";
 	}
 
 	/*public new void AddReward(float increment)
@@ -139,7 +136,6 @@ public class ArcadeKartAgent : Agent, IInput
 			TimeSpan playingTime = racingObserver.GetMatchTime();
 			Debug.Log("finish playingTime = " + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)");
 			SetReward((racingObserver.GetTotalLapCount() * racingObserver.GetCircuitLength() / arcadeKart.baseStats.TopSpeed) / ((float)playingTime.TotalSeconds * Time.timeScale));
-			trainingLog += "finish CircuitTime = \t" + playingTime + "\tplayingTime = " + (playingTime.TotalSeconds * Time.timeScale) + "(*Time.timeScale)\n";
 			EndEpisode();
 		}
 

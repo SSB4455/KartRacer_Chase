@@ -29,7 +29,7 @@ namespace UnityStandardAssets.Utility
 		int maxFinishLapCount = 0;
 		internal GamePlayingManager.IPlayingManager iPlayingManager;
 		public bool record = true;
-		bool recording = true;
+		bool recording;
 		StringBuilder playRecordString;
 
 
@@ -109,7 +109,7 @@ namespace UnityStandardAssets.Utility
 		private void Update()
 		{
 			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
-			if (recording)
+			if (record && recording)
 			{
 				playRecordString.Append("CarPosition\t").Append(GetMatchTime().Ticks).
 					Append(arcadeKart.transform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\t')).

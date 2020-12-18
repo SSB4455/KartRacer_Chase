@@ -15,12 +15,12 @@ public class MenuSceneScript : MonoBehaviour
 	int currentIndex = 0;
 	WaypointCircuit trackObj;
 
-	public Button[] Buttons;
 	Button[] changeTrackButtons;
 	public RacerDetailScript racerDetailPrefab;
 	public Text trackInfoText;
 	public InputField totalLapCountInputField;
 	public Button addRacerButton;
+	public Toggle playRecordToggle;
 	public Button deleteRacerDetailButton;
 	public GameObject addCarDetailPanel;
 	//public Dropdown behaviourTypeDropdown;
@@ -154,6 +154,7 @@ public class MenuSceneScript : MonoBehaviour
 			playerList.Add(playerJson);
 		}
 		gameParamJson.Add("Players", playerList);
+		gameParamJson.Add("PlayRecord", playRecordToggle.isOn);
 		PlayerPrefs.SetString("GameParam", gameParamJson.toJson());
 		UnityEngine.SceneManagement.SceneManager.LoadScene("PlayingScene");
 	}
