@@ -103,50 +103,24 @@ public class MenuSceneScript : MonoBehaviour
 
 	public void ShowAddPlayRecordButton()
 	{
-		addCarDetailPanel.gameObject.SetActive(true);
-		deleteRacerDetailButton.gameObject.SetActive(false);
-		for (int i = 0; i < racerDetailList?.Count; i++)
-		{
-			if (!racerDetailList[i].IsShdowRecord && racerDetailList[i].behaviourTypeText.text == behaviourTypeDropdown.options[1].text)
-			{       //只能有1个人工操作的车手
-				behaviourTypeDropdown.options.RemoveAt(1);
-				break;
-			}
-		}
+		addPlayRecordPanel.gameObject.SetActive(true);
 	}
 
 	public void AddPlayRecordButton()
 	{
-		addCarDetailPanel.gameObject.SetActive(false);
+		addPlayRecordPanel.gameObject.SetActive(false);
 
 		RacerDetailScript racerDetail = onChangeRacerDetail;
 		if (racerDetail == null)
 		{
 			racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
-			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ChangeRacerDetailButton(racerDetail));
+			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ChangePlayRecordButton(racerDetail));
 			racerDetailList.Add(racerDetail);
 		}
-		racerDetail.playerName = playerName;
-		racerDetail.carNameText.text = carName;
-		racerDetail.agentNameText.text = agentName;
-		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
-		racerDetail.transform.SetParent(addRacerButton.transform.parent);
-		racerDetail.transform.localScale = Vector3.one;
-		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
-
-		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
-		onChangeRacerDetail = null;
-	}
-
-	public void ChangeRacerDetail(RacerDetailScript racerDetail, string playerName, string carName, string agentName, int behaviourType)
-	{
-		 = onChangeRacerDetail;
-		if (racerDetail == null)
-		{
-			racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
-			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ChangeRacerDetailButton(racerDetail));
-			racerDetailList.Add(racerDetail);
-		}
+		carDropdown.options[carDropdown.value].text, agentModelDropdown.options[agentModelDropdown.value].text, behaviourTypeDropdown.value
+		
+		string playRecordContent = File.ReadAllLines()
+		
 		racerDetail.playerName = playerName;
 		racerDetail.carNameText.text = carName;
 		racerDetail.agentNameText.text = agentName;
@@ -181,6 +155,7 @@ public class MenuSceneScript : MonoBehaviour
 	{
 		addCarDetailPanel.gameObject.SetActive(false);
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
+		onChangeRacerDetail = null;
 	}
 
 	public void DeleteRacerDetailButton()
@@ -193,6 +168,7 @@ public class MenuSceneScript : MonoBehaviour
 		}
 		addCarDetailPanel.gameObject.SetActive(false);
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
+		onChangeRacerDetail = null;
 	}
 
 	public void StartButton()
