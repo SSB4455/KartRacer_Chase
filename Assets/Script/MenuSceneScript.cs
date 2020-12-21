@@ -25,6 +25,7 @@ public class MenuSceneScript : MonoBehaviour
 	public Dropdown agentModelDropdown;
 	public Dropdown behaviourTypeDropdown;
 	public Button deleteRacerDetailButton;
+	public PlayRecordPanelScript playRecordPanelScript;
 	List<RacerDetailScript> racerDetailList = new List<RacerDetailScript>();
 	int racerCountLimit = 2;
 
@@ -103,40 +104,31 @@ public class MenuSceneScript : MonoBehaviour
 
 	public void ShowAddPlayRecordButton()
 	{
-		addPlayRecordPanel.gameObject.SetActive(true);
+		playRecordPanelScript.AddPlayRecord();
 	}
 
-	public void AddPlayRecordButton()
+	public void AddPlayRecordButton(string playerName, string carName, string agentName, string behaviourType, string shadowRecordFilePath)
 	{
-		addPlayRecordPanel.gameObject.SetActive(false);
-
 		RacerDetailScript racerDetail = onChangeRacerDetail;
 		if (racerDetail == null)
 		{
 			racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
-			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ChangePlayRecordButton(racerDetail));
+			racerDetail.GetComponent<Button>().onClick.AddListener(() => playRecordPanelScript.SwitchPlayRecord()(racerDetail));
 			racerDetailList.Add(racerDetail);
 		}
-		carDropdown.options[carDropdown.value].text, agentModelDropdown.options[agentModelDropdown.value].text, behaviourTypeDropdown.value
-		
-		string playRecordContent = File.ReadAllLines()
 		
 		racerDetail.playerName = playerName;
 		racerDetail.carNameText.text = carName;
 		racerDetail.agentNameText.text = agentName;
-		racerDetail.behaviourTypeText.text = behaviourTypeDropdown.options[behaviourType].text;
+		racerDetail.behaviourTypeText.text = behaviourType;
+		racerDetail.shadowRecordFilePath = shadowRecordFilePath;
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
 		racerDetail.transform.localScale = Vector3.one;
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
-
-		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
-		onChangeRacerDetail = null;
 	}
 
-	RacerDetailScript onChangeRacerDetail;
 	void ChangeRacerDetailButton(RacerDetailScript racerDetail)
 	{
-		onChangeRacerDetail = racerDetail;
 		addCarDetailPanel.gameObject.SetActive(true);
 		deleteRacerDetailButton.gameObject.SetActive(true);
 		int behaviourTypeInt = 0;
