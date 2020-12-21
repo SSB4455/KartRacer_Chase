@@ -9,10 +9,11 @@ using UnityEngine.UI;
 
 public class PlayRecordPanelScript : MonoBehaviour
 {
+	MenuSceneScript menuSceneScript;
 	public ToggleGroup recordFileToggleGroup;
-	public Toggle togglePrefab;
-	List<Toggle> toggleList;
-	List<Toggle> recordFileList;
+	public RecordToggleScript togglePrefab;
+	List<RecordToggleScript> toggleList = new List<RecordToggleScript>();
+	List<RecordToggleScript> recordFileList = new List<RecordToggleScript>();
 
 	RecordDetail[] allRecords;
 
@@ -21,48 +22,119 @@ public class PlayRecordPanelScript : MonoBehaviour
 
 
 
-	private void Awake()
+	public void Init(MenuSceneScript menuSceneScript)
 	{
+		this.menuSceneScript = menuSceneScript;
 		string recordFilePath = Path.Combine(Application.persistentDataPath, "ml-agents_config");
 #if UNITY_EDITOR
 		recordFilePath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "ml-agents_config");
 #endif
-		string[] recordFiles = Directory.GetFiles(recordFilePath);
+		string[] recordFiles = Directory.GetFiles(recordFilePath, "ArcadeKartAgent_playRecord_*.txt");
 		allRecords = new RecordDetail[recordFiles.Length];
 		for (int i = 0; i < recordFiles.Length; i++)
 		{
+			Debug.Log(recordFiles[i]);
 			List<string> recordContentLines = new List<string>(File.ReadLines(recordFiles[i]));
 			RecordDetail recordDetail = new RecordDetail();
 			recordDetail.playTime = new DateTime(long.Parse(recordContentLines[0].Split('\t')[1]));
+			for (int j = 0; j < menuSceneScript?.trackPrefabs.Length; j++)
+			{
+				if (menuSceneScript.trackPrefabs[j].trackName == recordContentLines[2].Split('\t')[1])
+				{
+					recordDetail.circuit = menuSceneScript.trackPrefabs[j];
+					recordDetail.dataCorrect = true;
+					break;
+				}
+			}
+			recordDetail.filePath = recordFiles[i];
 			recordDetail.carName = recordContentLines[7].Split('\t')[1];
 			recordDetail.agentName = recordContentLines[8].Split('\t')[1];
 			recordDetail.behaviorType = recordContentLines[10].Split('\t')[1];
 			recordDetail.finishCircuitTime = new DateTime(long.Parse(recordContentLines[recordContentLines.Count - 1].Split('\t')[1]));
+			recordDetail.recordToggleScript = Instantiate<RecordToggleScript>(togglePrefab);
+			recordDetail.recordToggleScript.recordToggle.group = recordFileToggleGroup;
+			recordDetail.recordToggleScript.transform.SetParent(recordFileToggleGroup.transform);
+			recordDetail.recordToggleScript.transform.localScale = Vector3.one;
+			recordDetail.recordToggleScript.gameObject.SetActive(false);
+			recordDetail.recordToggleScript.recordText.text = recordDetail.carName + "\n" + recordDetail.agentName + "\n" + recordDetail.playTime.ToString("yyyy-MM-dd HH:mm:ss");
 			allRecords[i] = recordDetail;
 		}
 
-		for (int i = 0; i < 10; i++)
-		{
-			Toggle toggle = Instantiate<Toggle>(togglePrefab);
-			toggle.gameObject.SetActive(false);
-			toggleList.Add(toggle);
-		}
+
 	}
 
-	public void SetCircuit(string circuitName)
+	public void SetCircuit(string trackName)
 	{
-//carNameText.
+		while (recordFileList.Count > 0)
+		{
+			recordFileList[0].gameObject.SetActive(false);
+			recordFileList.RemoveAt(0);
+		}
+		recordFileToggleGroup.SetAllTogglesOff();
+		for (int i = 0; i < allRecords.Length; i++)
+		{
+			if (allRecords[i].dataCorrect && allRecords[i].circuit.trackName == trackName)
+			{
+				RecordToggleScript recordToggleScript = allRecords[i].recordToggleScript;
+				recordToggleScript.gameObject.SetActive(true);
+				recordToggleScript.recordToggle.isOn = false;
+				recordFileList.Add(recordToggleScript);
+			}
+		}
 	}
 
 	public string CurrentSelectFile;
 
+	RacerDetailScript racerDetail;
+	public void SwitchPlayRecord(RacerDetailScript racerDetail)
+	{
+		gameObject.SetActive(true);
+
+		this.racerDetail = racerDetail;
+		racerDetail.gameObject.SetActive(false);
+		for (int i = 0; i < allRecords.Length; i++)
+		{
+			if (racerDetail.shadowRecordFilePath == allRecords[i].filePath)
+			{
+				allRecords[i].recordToggleScript.recordToggle.isOn = true;
+				break;
+			}
+		}
+	}
+
+	public void SureButton()
+	{
+		for (int i = 0; i < allRecords.Length; i++)
+		{
+			if (allRecords[i].recordToggleScript.recordToggle.isOn)
+			{
+				racerDetail.playerName = "shadow";
+				racerDetail.carNameText.text = allRecords[i].carName;
+				racerDetail.agentNameText.text = allRecords[i].agentName;
+				racerDetail.behaviorTypeText.text = allRecords[i].behaviorType;
+				racerDetail.gameObject.SetActive(true);
+			}
+		}
+
+	}
+
+	public void CancelButton()
+	{
+		gameObject.SetActive(false);
+		racerDetail = null;
+	}
+
+
+
+
 
 	struct RecordDetail
 	{
-		bool dataCorrect;
+		internal string filePath;
+		internal bool dataCorrect;
 		internal DateTime playTime;        //启动时间
 		int timeScale;  //时间缩放倍数
-		UnityStandardAssets.Utility.WaypointCircuit circuit;   //赛道
+		internal UnityStandardAssets.Utility.WaypointCircuit circuit;   //赛道
 		string playerName;// 欧阳双钻 //玩家的名字
 		internal string carName;// KartClassic //车的名字
 		internal string agentName;// AI_Racer1 //AgentName
@@ -76,5 +148,7 @@ public class PlayRecordPanelScript : MonoBehaviour
 								//CarPosition	12313242332	3.5,12,0.3	0	0,0,0	//从比赛开始的时间戳	位置	比赛进度	三维速度
 
 		internal DateTime finishCircuitTime;//	505363343	00:00:50.5363343	//完成的全部耗时	耗时时间戳	小时分钟秒毫秒格式
+	
+		internal RecordToggleScript recordToggleScript;
 	}
 }

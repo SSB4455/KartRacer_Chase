@@ -2,9 +2,11 @@ PlayTime	637439055252040547
 TimeScale	1
 CircuitName	OvalTrack
 CircuitId	f7f6758f18cd145722af32d2174f27c6
+CircuitVersion	v0.1	//赛道的更新版本
 CircuitLength	278.9362
 PlayerName	欧阳双钻_KartClassic_0
 CarName	欧阳双钻_KartClassic_0
+AgentName	AI_Racer1	//AgentName
 TotalLapCount	1
 TotalCarCount	1
 CircuitPosition	0.0, 0.0, 0.0

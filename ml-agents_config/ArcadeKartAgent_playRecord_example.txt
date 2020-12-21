@@ -1,4 +1,4 @@
-PlayTime		//启动时间
+PlayTime	637438753978561312	//启动时间
 TimeScale	1	//时间缩放倍数
 CircuitName	TraningTrack1	//赛道的名字
 CircuitId	mq65c23dfg9jiad348rty51706hr	//赛道的唯一id
