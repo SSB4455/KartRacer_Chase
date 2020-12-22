@@ -7,24 +7,33 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayRecordPanelScript : MonoBehaviour
+public class AddRacerDetailPanelScript : MonoBehaviour
 {
 	MenuSceneScript menuSceneScript;
+
+	public Button driveModeButton;
+	public Button shadowModeButton;
+	public Image driveModeBackgroundImage;
+	public Dropdown carDropdown;
+	public Dropdown agentModelDropdown;
+	public Dropdown behaviorTypeDropdown;
+	public Button deleteRacerDetailButton;
+
+	bool detailIsShadow;
+	public Image shadowModeBackgroundImage;
 	public ToggleGroup recordFileToggleGroup;
 	public RecordToggleScript togglePrefab;
 	List<RecordToggleScript> toggleList = new List<RecordToggleScript>();
 	List<RecordToggleScript> recordFileList = new List<RecordToggleScript>();
-
 	RecordDetail[] allRecords;
-
-	public Image backgroundImage;
-	public Button deleteRecordFileButton;
 
 
 
 	public void Init(MenuSceneScript menuSceneScript)
 	{
 		this.menuSceneScript = menuSceneScript;
+		gameObject.SetActive(false);
+
 		string recordFilePath = Path.Combine(Application.persistentDataPath, "ml-agents_config");
 #if UNITY_EDITOR
 		recordFilePath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "ml-agents_config");
@@ -33,7 +42,7 @@ public class PlayRecordPanelScript : MonoBehaviour
 		allRecords = new RecordDetail[recordFiles.Length];
 		for (int i = 0; i < recordFiles.Length; i++)
 		{
-			Debug.Log(recordFiles[i]);
+			//Debug.Log(recordFiles[i]);
 			List<string> recordContentLines = new List<string>(File.ReadLines(recordFiles[i]));
 			RecordDetail recordDetail = new RecordDetail();
 			recordDetail.playTime = new DateTime(long.Parse(recordContentLines[0].Split('\t')[1]));
@@ -59,11 +68,9 @@ public class PlayRecordPanelScript : MonoBehaviour
 			recordDetail.recordToggleScript.recordText.text = recordDetail.carName + "\n" + recordDetail.agentName + "\n" + recordDetail.playTime.ToString("yyyy-MM-dd HH:mm:ss");
 			allRecords[i] = recordDetail;
 		}
-
-
 	}
 
-	public void SetCircuit(string trackName)
+	public void SetShadowModeCircuit(string trackName)
 	{
 		while (recordFileList.Count > 0)
 		{
@@ -83,45 +90,111 @@ public class PlayRecordPanelScript : MonoBehaviour
 		}
 	}
 
-	public string CurrentSelectFile;
-
 	RacerDetailScript racerDetail;
-	public void SwitchPlayRecord(RacerDetailScript racerDetail)
+	internal void Show(RacerDetailScript racerDetail)
 	{
-		gameObject.SetActive(true);
-
 		this.racerDetail = racerDetail;
 		racerDetail.gameObject.SetActive(false);
-		for (int i = 0; i < allRecords.Length; i++)
+
+		detailIsShadow = racerDetail.IsShdowRecord;
+		deleteRacerDetailButton.gameObject.SetActive(false);
+		driveModeBackgroundImage.gameObject.SetActive(!detailIsShadow);
+		shadowModeBackgroundImage.gameObject.SetActive(detailIsShadow);
+		if (!racerDetail.IsShdowRecord)
 		{
-			if (racerDetail.shadowRecordFilePath == allRecords[i].filePath)
+			if (!string.IsNullOrEmpty(racerDetail.playerName))
 			{
-				allRecords[i].recordToggleScript.recordToggle.isOn = true;
-				break;
+				deleteRacerDetailButton.gameObject.SetActive(true);
+
+				//同步显示选中的车辆
+				//同步显示选中的AI模型
+				int behaviorTypeInt = 0;		//同步显示操作方式
+				for (int i = 0; i < behaviorTypeDropdown.options.Count; i++)
+				{
+					if (behaviorTypeDropdown.options[i].text == racerDetail.behaviorTypeText.text)
+					{
+						behaviorTypeInt = i;
+						break;
+					}
+				}
+				behaviorTypeDropdown.value = behaviorTypeInt;
+			}
+		} else {
+			deleteRacerDetailButton.gameObject.SetActive(true);
+			for (int i = 0; i < allRecords.Length; i++)
+			{
+				if (racerDetail.shadowRecordFilePath == allRecords[i].filePath)
+				{
+					allRecords[i].recordToggleScript.recordToggle.isOn = true;
+					break;
+				}
 			}
 		}
+
+		gameObject.SetActive(true);
+	}
+
+	public void SwitchToDriveModeButton()
+	{
+		detailIsShadow = false;
+		driveModeBackgroundImage.gameObject.SetActive(!detailIsShadow);
+		shadowModeBackgroundImage.gameObject.SetActive(detailIsShadow);
+	}
+
+	public void SwitchToShadowModeButton()
+	{
+		detailIsShadow = true;
+		driveModeBackgroundImage.gameObject.SetActive(!detailIsShadow);
+		shadowModeBackgroundImage.gameObject.SetActive(detailIsShadow);
 	}
 
 	public void SureButton()
 	{
-		for (int i = 0; i < allRecords.Length; i++)
+		gameObject.SetActive(false);
+
+		if (!detailIsShadow)
 		{
-			if (allRecords[i].recordToggleScript.recordToggle.isOn)
+			racerDetail.playerName = "欧阳双钻";
+			racerDetail.carNameText.text = carDropdown.options[carDropdown.value].text;
+			racerDetail.agentNameText.text = agentModelDropdown.options[agentModelDropdown.value].text;
+			racerDetail.behaviorTypeText.text = behaviorTypeDropdown.options[behaviorTypeDropdown.value].text;
+		}
+		else
+		{
+			for (int i = 0; i < allRecords.Length; i++)
 			{
-				racerDetail.playerName = "shadow";
-				racerDetail.carNameText.text = allRecords[i].carName;
-				racerDetail.agentNameText.text = allRecords[i].agentName;
-				racerDetail.behaviorTypeText.text = allRecords[i].behaviorType;
-				racerDetail.gameObject.SetActive(true);
+				if (allRecords[i].recordToggleScript.recordToggle.isOn)
+				{
+					racerDetail.playerName = "shadow";
+					racerDetail.carNameText.text = allRecords[i].carName + "(shadow)";
+					racerDetail.agentNameText.text = allRecords[i].agentName;
+					racerDetail.behaviorTypeText.text = allRecords[i].behaviorType + "\n" + allRecords[i].playTime.ToString("yyyy-MM-dd HH:mm:ss");
+					racerDetail.shadowRecordFilePath = allRecords[i].filePath;
+					racerDetail.gameObject.SetActive(true);
+					break;
+				}
 			}
 		}
+		racerDetail.gameObject.SetActive(true);
 
+		menuSceneScript.AddRacerDetail(racerDetail);
 	}
 
 	public void CancelButton()
 	{
 		gameObject.SetActive(false);
+		racerDetail.gameObject.SetActive(true);
+		if (string.IsNullOrEmpty(racerDetail.playerName))
+		{
+			Destroy(racerDetail.gameObject);
+		}
 		racerDetail = null;
+	}
+
+	public void DeleteButton()
+	{
+		gameObject.SetActive(false);
+		menuSceneScript.DeleteRacerDetail(racerDetail);
 	}
 
 
@@ -148,7 +221,7 @@ public class PlayRecordPanelScript : MonoBehaviour
 								//CarPosition	12313242332	3.5,12,0.3	0	0,0,0	//从比赛开始的时间戳	位置	比赛进度	三维速度
 
 		internal DateTime finishCircuitTime;//	505363343	00:00:50.5363343	//完成的全部耗时	耗时时间戳	小时分钟秒毫秒格式
-	
+
 		internal RecordToggleScript recordToggleScript;
 	}
 }

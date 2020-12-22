@@ -18,14 +18,9 @@ public class MenuSceneScript : MonoBehaviour
 	public RacerDetailScript racerDetailPrefab;
 	public Text trackInfoText;
 	public InputField totalLapCountInputField;
+	public AddRacerDetailPanelScript addRacerDetailPanelScript;
 	public Button addRacerButton;
 	public Toggle savePlayRecordToggle;
-	public GameObject addCarDetailPanel;
-	public Dropdown carDropdown;
-	public Dropdown agentModelDropdown;
-	public Dropdown behaviorTypeDropdown;
-	public Button deleteRacerDetailButton;
-	public PlayRecordPanelScript playRecordPanelScript;
 	List<RacerDetailScript> racerDetailList = new List<RacerDetailScript>();
 	int racerCountLimit = 2;
 
@@ -33,18 +28,29 @@ public class MenuSceneScript : MonoBehaviour
 
 	private void Awake()
 	{
-		playRecordPanelScript.Init(this);
-		playRecordPanelScript.gameObject.SetActive(false);
+		addRacerDetailPanelScript.Init(this);
+
 	}
 
 	private void Start()
 	{
-		addCarDetailPanel.gameObject.SetActive(false);
 		trackPreviewCamera.fieldOfView *= (16f / 9) / Camera.main.aspect;
 
+		addRacerButton.onClick.AddListener(() => this.ShowRacerDetailPanelButton());
 		ChangeTrackButton(0);
 
-		//AddRacerDetail("欧阳双钻", "KartClassic", "AI_Racer1", 1);
+
+		RacerDetailScript racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
+		racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ShowRacerDetailPanelButton(racerDetail));
+		racerDetail.transform.SetParent(addRacerButton.transform.parent);
+		racerDetail.transform.localScale = Vector3.one;
+		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
+		racerDetail.playerName = "欧阳双钻";
+		racerDetail.carNameText.text = "KartClassic";
+		racerDetail.agentNameText.text = "AI_Racer1";
+		racerDetail.behaviorTypeText.text = "Heuristic(人工)";
+		racerDetail.gameObject.SetActive(true);
+		AddRacerDetail(racerDetail);
 	}
 
 	public void ChangeTrackButton(int moveOffset)
@@ -65,83 +71,34 @@ public class MenuSceneScript : MonoBehaviour
 
 		trackObj = Instantiate<WaypointCircuit>(trackPrefabs[currentIndex]);
 		trackInfoText.text = "Circuit: " + trackObj.trackName + "\tLength: " + (int)trackObj.CircuitLength + "\n" + trackObj.trackInfo;
-		playRecordPanelScript.SetCircuit(trackObj.trackName);
+		addRacerDetailPanelScript.SetShadowModeCircuit(trackObj.trackName);
 	}
 
-	public void ShowAddRacerDetailButton()
+	public void ShowRacerDetailPanelButton(RacerDetailScript racerDetail = null)
 	{
-		addCarDetailPanel.gameObject.SetActive(true);
-		deleteRacerDetailButton.gameObject.SetActive(false);
-		for (int i = 0; i < racerDetailList?.Count; i++)
-		{
-			if (!racerDetailList[i].IsShdowRecord && racerDetailList[i].behaviorTypeText.text == behaviorTypeDropdown.options[1].text)
-			{       //只能有1个人工操作的车手
-				behaviorTypeDropdown.options.RemoveAt(1);
-				break;
-			}
-		}
-	}
-
-	public void AddRacerDetailButton()
-	{
-		addCarDetailPanel.gameObject.SetActive(false);
-		AddRacerDetail("欧阳双钻", carDropdown.options[carDropdown.value].text, agentModelDropdown.options[agentModelDropdown.value].text, behaviorTypeDropdown.value);
-	}
-
-	public void AddRacerDetail(string playerName, string carName, string agentName, int behaviorType)
-	{
-		RacerDetailScript racerDetail = null;
-		if (racerDetail == null) 
+		if (racerDetail == null)
 		{
 			racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
-			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ChangeRacerDetailButton(racerDetail));
+			racerDetail.GetComponent<Button>().onClick.AddListener(() => this.ShowRacerDetailPanelButton(racerDetail));
+			racerDetail.transform.SetParent(addRacerButton.transform.parent);
+			racerDetail.transform.localScale = Vector3.one;
+			racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
+		}
+
+		addRacerDetailPanelScript.Show(racerDetail);
+	}
+
+	public void AddRacerDetail(RacerDetailScript racerDetail)
+	{
+		if (!racerDetailList.Contains(racerDetail))
+		{
 			racerDetailList.Add(racerDetail);
 		}
-		racerDetail.playerName = playerName;
-		racerDetail.carNameText.text = carName;
-		racerDetail.agentNameText.text = agentName;
-		racerDetail.behaviorTypeText.text = behaviorTypeDropdown.options[behaviorType].text;
-		racerDetail.transform.SetParent(addRacerButton.transform.parent);
-		racerDetail.transform.localScale = Vector3.one;
-		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
 
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
 	}
 
-	public void ShowAddPlayRecordButton()
-	{
-		RacerDetailScript racerDetail = Instantiate<RacerDetailScript>(racerDetailPrefab);
-		racerDetail.transform.SetParent(addRacerButton.transform.parent);
-		racerDetail.transform.localScale = Vector3.one;
-		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
-		racerDetail.GetComponent<Button>().onClick.AddListener(() => playRecordPanelScript.SwitchPlayRecord(racerDetail));
-		racerDetailList.Add(racerDetail);
-		playRecordPanelScript.SwitchPlayRecord(racerDetail);
-	}
-
-	void ChangeRacerDetailButton(RacerDetailScript racerDetail)
-	{
-		addCarDetailPanel.gameObject.SetActive(true);
-		deleteRacerDetailButton.gameObject.SetActive(true);
-		int behaviorTypeInt = 0;
-		for (int i = 0; i < behaviorTypeDropdown.options.Count; i++)
-		{
-			if (behaviorTypeDropdown.options[i].text == racerDetail.behaviorTypeText.text)
-			{
-				behaviorTypeInt = i;
-				break;
-			}
-		}
-		behaviorTypeDropdown.value = behaviorTypeInt;
-	}
-
-	public void RacerDetailCancelButton()
-	{
-		addCarDetailPanel.gameObject.SetActive(false);
-		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
-	}
-
-	public void DeleteRacerDetailButton(RacerDetailScript racerDetail)
+	public void DeleteRacerDetail(RacerDetailScript racerDetail)
 	{
 		if (racerDetail != null)
 		{
@@ -149,7 +106,6 @@ public class MenuSceneScript : MonoBehaviour
 			Destroy(racerDetail.gameObject);
 			racerDetail = null;
 		}
-		addCarDetailPanel.gameObject.SetActive(false);
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
 	}
 
