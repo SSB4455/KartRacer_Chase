@@ -7,7 +7,6 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using System.Collections.Generic;
 using System;
-using System.IO;
 
 public class ArcadeKartAgent : Agent, IInput
 {
@@ -15,6 +14,7 @@ public class ArcadeKartAgent : Agent, IInput
 	ICircuitRacingObserver racingObserver;
 	Vector2 agentInput = new Vector2();
 	internal bl_Joystick joystick;
+	bool syncActionToUI;
 	[Tooltip("Which layers the wheels will detect.")]
 	public LayerMask GroundLayers = Physics.DefaultRaycastLayers;
 
@@ -52,6 +52,8 @@ public class ArcadeKartAgent : Agent, IInput
 		transform.rotation = racingObserver.GetStartPointRotation();
 
 		arcadeKart.CarRigidbody.velocity = Vector3.zero;
+
+		syncActionToUI = !Application.isMobilePlatform || racingObserver.GetBehaviorType() != ArcadeKartAgent.BehaviorType.HeuristicOnly;
 	}
 
 	/*public new void AddReward(float increment)
@@ -112,6 +114,10 @@ public class ArcadeKartAgent : Agent, IInput
 		// Actions, size = 2
 		agentInput.x = vectorAction[0];
 		agentInput.y = vectorAction[1];
+		if (syncActionToUI && joystick)
+		{
+			joystick.SystemMove(new Vector3(vectorAction[0], vectorAction[1], 0));
+		}
 
 		float carSpeed = arcadeKart.ForwardSpeedValue;
 		if (carSpeed > 0)
@@ -203,4 +209,13 @@ public class ArcadeKartAgent : Agent, IInput
 	//ArcadeKartGuideLinePropertie : MonoBehaviour
 	//public int forwardDistance;
 	//public bool ShowRaycasts;
+
+
+	public enum BehaviorType
+	{
+		Default = 0,
+		HeuristicOnly = 1,
+		InferenceOnly = 2,
+		ShadowPlay = 3
+	}
 }

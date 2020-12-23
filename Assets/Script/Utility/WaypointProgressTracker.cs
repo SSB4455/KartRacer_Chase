@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text;
-using Unity.MLAgents.Policies;
 using UnityEngine;
 
 namespace UnityStandardAssets.Utility
@@ -16,7 +15,8 @@ namespace UnityStandardAssets.Utility
 
 		public WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
 		public KartGame.KartSystems.ArcadeKart arcadeKart;
-		internal BehaviorType behaviorType;
+		internal ArcadeKartAgent.BehaviorType behaviorType;
+		internal string shadowRecordFilePath;
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
@@ -220,7 +220,7 @@ namespace UnityStandardAssets.Utility
 			return iPlayingManager.GetRacingCarCount();
 		}
 
-		public BehaviorType GetBehaviorType()
+		public ArcadeKartAgent.BehaviorType GetBehaviorType()
 		{
 			return behaviorType;
 		}

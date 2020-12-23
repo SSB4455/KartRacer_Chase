@@ -32,5 +32,5 @@ public interface ICircuitRacingObserver
 	TimeSpan GetBestLapTime();
 
 	float GetForwardSpeed();
-	Unity.MLAgents.Policies.BehaviorType GetBehaviorType();
+	ArcadeKartAgent.BehaviorType GetBehaviorType();
 }

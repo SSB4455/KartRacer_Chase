@@ -68,6 +68,7 @@ namespace UnityStandardAssets.Utility
 				}
 				carCameras[racingObserver].gameObject.SetActive(true);
 				carAgents[racingObserver].joystick = joystick;
+				joystick.SystemControl(racingObserver.GetBehaviorType() == ArcadeKartAgent.BehaviorType.ShadowPlay);
 				showCarIndex = carList.IndexOf(racingObserver);
 				return showCarIndex;
 			}

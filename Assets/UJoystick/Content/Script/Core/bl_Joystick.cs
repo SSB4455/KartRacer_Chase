@@ -16,7 +16,8 @@ public class bl_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     [Header("Reference")]
     [SerializeField]private RectTransform StickRect;//The middle joystick UI
-    [SerializeField] private RectTransform CenterReference;
+    [SerializeField]private RectTransform CenterReference;
+	bool isSystemControl;
 
     //Privates
     private Vector3 DeathArea;
@@ -69,11 +70,25 @@ public class bl_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         }
     }
 
+    internal void SystemControl(bool isSystemControl)
+    {
+		this.isSystemControl = isSystemControl;
+	}
+
+	internal void SystemMove(Vector3 move)
+	{
+		StickRect.position = DeathArea + move * radio;
+	}
+
     /// <summary>
     /// 
     /// </summary>
     void Update()
-    {
+	{
+		if (isSystemControl)
+		{
+			return;
+		}
         DeathArea = CenterReference.position;
         //If this not free (not touched) then not need continue
         if (!isFree)
@@ -95,6 +110,10 @@ public class bl_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     /// <param name="data"></param>
     public void OnPointerDown(PointerEventData data)
     {
+        if (isSystemControl)
+        {
+            return;
+        }
         //Detect if is the default touchID
         if (lastId == -2)
         {
@@ -118,7 +137,11 @@ public class bl_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     /// </summary>
     /// <param name="data"></param>
     public void OnDrag(PointerEventData data)
-    {
+	{
+		if (isSystemControl)
+		{
+			return;
+		}
         //If this touch id is the first touch in the event
         if (data.pointerId == lastId)
         {
@@ -143,7 +166,11 @@ public class bl_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     /// </summary>
     /// <param name="data"></param>
     public void OnPointerUp(PointerEventData data)
-    {
+	{
+		if (isSystemControl)
+		{
+			return;
+		}
         isFree = true;
         currentVelocity = Vector3.zero;
         //leave the default id again
