@@ -6,9 +6,10 @@ CircuitVersion	v0.1	//赛道的更新版本
 CircuitLength	405.033	//赛道的单圈长度
 PlayerName	欧阳双钻	//玩家的名字
 CarName	KartClassic	//车的名字
-AgentName	AI_Racer1	//AgentName
-AgentValueMD5	xcvfe43470vb4jmgu7z1cvv2ntyn0hg43sd6i	//AgentValueMD5
-BehaviorType	Default	//AgentBehaviorType
+AgentName	ArcadeKartAgent	//AgentName
+ModelName	AI_Racer1	//ModelName
+ModelMD5	xcvfe43470vb4jmgu7z1cvv2ntyn0hg43sd6i	//AgentValueMD5
+BehaviorType	0	//AgentBehaviorType	0-Default 1-HeuristicOnly 2-InferenceOnly
 TotalLapCount	1	//跑几圈
 MatchId	20201217ttcwdf01	//比赛的id所有参加这场比赛的车辆都会有同样的比赛id
 TotalCarCount	1	//总共有几辆赛车参加比赛

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using Unity.MLAgents.Policies;
 using UnityEngine;
 
 namespace UnityStandardAssets.Utility
@@ -15,6 +16,7 @@ namespace UnityStandardAssets.Utility
 
 		public WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
 		public KartGame.KartSystems.ArcadeKart arcadeKart;
+		internal BehaviorType behaviorType;
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
@@ -37,6 +39,11 @@ namespace UnityStandardAssets.Utility
 		// setup script properties
 		private void Start()
 		{
+			if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "ml-agents_config")))
+			{
+				Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "ml-agents_config"));
+			}
+
 			Reset();
 
 			//Debug.Log(PlayerPrefs.GetInt("LapBestTime_" + circuit.trackName + arcadeKart.name, 0));
@@ -66,15 +73,16 @@ namespace UnityStandardAssets.Utility
 				playRecordString.Append("TimeScale\t").AppendLine(Time.timeScale.ToString());
 				playRecordString.Append("CircuitName\t").AppendLine(circuit.trackName);
 				playRecordString.Append("CircuitId\t").AppendLine(circuit.Id);
-				playRecordString.Append("CircuitVersion\t").AppendLine("circuit.Version未完成");
+				playRecordString.Append("CircuitVersion\t").AppendLine("0\t//circuit.Version未完成");
 				playRecordString.Append("CircuitLength\t").AppendLine(circuit.CircuitLength.ToString());
 				playRecordString.Append("PlayerName\t").AppendLine(arcadeKart.name);
 				playRecordString.Append("CarName\t").AppendLine(arcadeKart.name);
-				playRecordString.Append("AgentName\t").AppendLine("AgentName未完成");
-				playRecordString.Append("AgentValueMD5\t").AppendLine("AgentValueMD5未完成");
-				playRecordString.Append("BehaviorType\t").AppendLine("BehaviorType未完成");
+				playRecordString.Append("AgentName\t").AppendLine("ArcadeKartAgent\t//AgentName未完成");
+				playRecordString.Append("ModelName\t").AppendLine("AI_Racer1\t//ModelName未完成");
+				playRecordString.Append("ModelMD5\t").AppendLine("ModelMD5未完成");
+				playRecordString.Append("BehaviorType\t").Append((int)behaviorType).AppendLine("\t//0-Default 1-HeuristicOnly 2-InferenceOnly");
 				playRecordString.Append("TotalLapCount\t").AppendLine(totalLapCount.ToString());
-				playRecordString.Append("MatchId\t").AppendLine("iPlayingManager.GetMatchId()未完成");
+				playRecordString.Append("MatchId\t").AppendLine(iPlayingManager.GetMatchId());
 				playRecordString.Append("TotalCarCount\t").AppendLine(iPlayingManager.GetRacingCarCount().ToString());
 				playRecordString.Append("CircuitPosition").Append(circuit.trackTransform.position.ToString().Replace('(', '\t').Replace(')', '\n'));
 				recording = true;
@@ -210,6 +218,11 @@ namespace UnityStandardAssets.Utility
 		public int GetRacingCarCount()
 		{
 			return iPlayingManager.GetRacingCarCount();
+		}
+
+		public BehaviorType GetBehaviorType()
+		{
+			return behaviorType;
 		}
 
 

@@ -6,11 +6,60 @@ using UnityEngine.UI;
 
 public class RacerDetailScript : MonoBehaviour
 {
-	public Text carNameText;
-	public Text agentNameText;
-	public Text behaviorTypeText;
 	public Image backgroundImage;
+	[SerializeField] private Text Text;
+	string carName;
+	public string CarName{
+		set
+		{
+			carName = value;
+			Text.text = ToString();
+		}
+		get { return carName; }
+	}
+	string modelName;
+	public string ModelName
+	{
+		set
+		{
+			modelName = value;
+			Text.text = ToString();
+		}
+		get { return modelName; }
+	}
+	Unity.MLAgents.Policies.BehaviorType behaviorType;
+	public int BehaviorType
+	{
+		set
+		{
+			behaviorType = (Unity.MLAgents.Policies.BehaviorType)value;
+			Text.text = ToString();
+		}
+		get { return (int)behaviorType; }
+	}
 	internal string playerName;
-	internal string shadowRecordFilePath;
+	string shadowRecordFilePath;
+	internal string ShadowRecordFilePath
+	{
+		set
+		{
+			shadowRecordFilePath = value;
+			Text.text = ToString();
+		}
+		get { return shadowRecordFilePath; }
+	}
 	public bool IsShdowRecord { get { return !string.IsNullOrEmpty(shadowRecordFilePath); } }
+
+
+
+	new string ToString()
+	{
+		string str = carName + "\n" + modelName + "\n" + behaviorType.ToString();
+		if (IsShdowRecord)
+		{
+			System.IO.FileInfo fileInfo = new System.IO.FileInfo(shadowRecordFilePath);
+			str = "shadow : " + str + "\n" + fileInfo.Name.Replace("ArcadeKartAgent_playRecord_", "").Replace(".txt", "");
+		}
+		return str;
+	}
 }

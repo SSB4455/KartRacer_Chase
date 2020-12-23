@@ -18,6 +18,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 	//public GameObject gamingUIPrefab;
 	public GamingUI gamingUI;
 
+	string matchId;
 	List<WaypointProgressTracker> carList = new List<WaypointProgressTracker>();
 	int GamePlayerCount { get { return carList.Count; } }
 
@@ -26,6 +27,8 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 	private void Start()
 	{
 		string gameParamJsonString = PlayerPrefs.GetString("GameParam", "{}");
+		matchId = DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + UnityStandardAssets.Utility.MD5.GenerateMD5(DateTime.Now.Ticks + gameParamJsonString);
+		Debug.Log("matchId = " + matchId);
 		Hashtable gameParamJson = MiniJSON.jsonDecode(gameParamJsonString) as Hashtable;
 		if (GameSuteJsonCheck(gameParamJson))
 		{
@@ -66,7 +69,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 			{
 				Hashtable playerJson = playerList[i] as Hashtable;
 				GameObject arcadeKart = Instantiate(arcadeKartPrefab);
-				arcadeKart.name = (string)playerJson["Name"] + "_" + (string)playerJson["Car"] + "_" + i;
+				arcadeKart.name = (string)playerJson["PlayerName"] + "_" + (string)playerJson["Car"] + "_" + i;
 				WaypointProgressTracker waypointProgressTracker = arcadeKart.GetComponent<WaypointProgressTracker>();
 				ArcadeKartAgent agent = arcadeKart.GetComponent<ArcadeKartAgent>();
 				if (waypointProgressTracker && agent)
@@ -74,18 +77,15 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 					waypointProgressTracker.iPlayingManager = this;
 					waypointProgressTracker.circuit = Track;
 					waypointProgressTracker.totalLapCount = (int)(double)gameParamJson["TotalLapCount"];
-					waypointProgressTracker.record = (bool)gameParamJson["PlayRecord"];;
+					waypointProgressTracker.record = (bool)gameParamJson["PlayRecord"];
 					BehaviorParameters behaviorParameters = agent.GetComponent<BehaviorParameters>();
 					if (behaviorParameters)
 					{
 						behaviorParameters.TeamId = i;
-						switch (playerJson["BehaviorType"])
+						waypointProgressTracker.behaviorType = behaviorParameters.BehaviorType = (Unity.MLAgents.Policies.BehaviorType)(int)(double)playerJson["BehaviorType"];
+						if (behaviorParameters.BehaviorType == BehaviorType.HeuristicOnly)
 						{
-							case "Heuristic(人工)":
-								behaviorParameters.BehaviorType = BehaviorType.HeuristicOnly;
-								showCar = waypointProgressTracker;
-								break;
-							default: behaviorParameters.BehaviorType = BehaviorType.Default; break;
+							showCar = waypointProgressTracker;
 						}
 					}
 					carList.Add(waypointProgressTracker);
@@ -131,6 +131,11 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 		{
 			
 		}*/
+	}
+
+	public string GetMatchId()
+	{
+		return matchId;
 	}
 
 	public bool MatchFinish(WaypointProgressTracker car)
@@ -189,6 +194,7 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 	/// </summary>
 	public interface IPlayingManager
 	{
+		string GetMatchId();
 		bool MatchFinish(WaypointProgressTracker car);
 		int GetRank(WaypointProgressTracker car);
 		int GetRacingCarCount();

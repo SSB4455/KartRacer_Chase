@@ -46,9 +46,9 @@ public class MenuSceneScript : MonoBehaviour
 		racerDetail.transform.localScale = Vector3.one;
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
 		racerDetail.playerName = "欧阳双钻";
-		racerDetail.carNameText.text = "KartClassic";
-		racerDetail.agentNameText.text = "AI_Racer1";
-		racerDetail.behaviorTypeText.text = "Heuristic(人工)";
+		racerDetail.CarName = "KartClassic";
+		racerDetail.ModelName= "AI_Racer1";
+		racerDetail.BehaviorType = (int)Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
 		racerDetail.gameObject.SetActive(true);
 		AddRacerDetail(racerDetail);
 	}
@@ -117,12 +117,12 @@ public class MenuSceneScript : MonoBehaviour
 		ArrayList playerList = new ArrayList();
 		foreach (RacerDetailScript racerDetail in racerDetailList)
 		{
-			Hashtable playerJson = new Hashtable() { 
-				{ "IsShadowRecord", racerDetail.IsShdowRecord },
-				{ "Name", racerDetail.playerName },
-				{ "Car", racerDetail.carNameText.text },
-				{ "AgentModel", racerDetail.agentNameText.text },
-				{ "BehaviorType", racerDetail.behaviorTypeText.text } };
+			Hashtable playerJson = new Hashtable() {
+				{ "PlayerName", racerDetail.playerName },
+				{ "Car", racerDetail.CarName },
+				{ "AgentModel", racerDetail.ModelName },
+				{ "BehaviorType", racerDetail.BehaviorType },
+				{ "ShadowRecordFilePath", racerDetail.ShadowRecordFilePath } };
 			playerList.Add(playerJson);
 		}
 		gameParamJson.Add("Players", playerList);

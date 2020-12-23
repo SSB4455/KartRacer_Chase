@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -34,14 +33,7 @@ namespace UnityStandardAssets.Utility
 				{
 					str += wayCheckPoints[i].name + wayCheckPoints[i].position + wayCheckPoints[i].localScale + wayCheckPoints[i].rotation;
 				}
-				byte[] byteOld = Encoding.UTF8.GetBytes(str);
-				byte[] byteNew = md5.ComputeHash(byteOld);
-				StringBuilder sb = new StringBuilder();
-				foreach (byte b in byteNew)
-				{
-					sb.Append(b.ToString("x2"));
-				}
-				return sb.ToString();
+				return UnityStandardAssets.Utility.MD5.GenerateMD5(str);
 			}
 		}
 

@@ -6,9 +6,10 @@ CircuitVersion	v0.1	//赛道的更新版本
 CircuitLength	278.9362
 PlayerName	欧阳双钻_KartClassic_0
 CarName	欧阳双钻_KartClassic_0
-AgentName	AI_Racer1	//AgentName
-AgentValueMD5	xcvfe43470vb4jmgu7z1cvv2ntyn0hg43sd6i	//AgentValueMD5
-BehaviorType	Default	//AgentBehaviorType
+AgentName	ArcadeKartAgent	//AgentName
+ModelName	AI_Racer1	//ModelName
+ModelMD5	xcvfe43470vb4jmgu7z1cvv2ntyn0hg43sd6i	//AgentValueMD5
+BehaviorType	0	//AgentBehaviorType	0-Default 1-HeuristicOnly 2-InferenceOnly
 TotalLapCount	1
 TotalCarCount	1
 CircuitPosition	0.0, 0.0, 0.0

@@ -4858,6 +4858,26 @@ PrefabInstance:
       propertyPath: Duration
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4011586438321053151, guid: fa466b8b2e4b38742bd0b13e10ba477d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 4011586438321053151, guid: fa466b8b2e4b38742bd0b13e10ba477d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 4011586438321053151, guid: fa466b8b2e4b38742bd0b13e10ba477d,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4011586438321053151, guid: fa466b8b2e4b38742bd0b13e10ba477d,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5938156134333677914, guid: fa466b8b2e4b38742bd0b13e10ba477d,
         type: 3}
       propertyPath: m_AnchorMin.y

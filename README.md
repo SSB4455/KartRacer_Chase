@@ -10,6 +10,7 @@
 - 保存赛车的行驶记录
   - 能够回放赛车的行驶记录(按赛道显示 和正常车辆一起并不发生碰撞)
 - 增加赛车操作的UI显示
+- 车辆头上加名字
 - 优化在移动设备上的帧数
 - 调整ArcadeKart碰到墙壁后马上按住前进不松手会有动作延迟
 - 增加行驶中获得奖励及用时UI显示(记录数据并能够恢复查看)
@@ -87,5 +88,8 @@ mlagents-learn trainer_config.yaml --run-id=AI_Racer1 --train --force
 
 ## 使用插件
 
-[Curvy Splines](https://assetstore.unity.com/packages/tools/utilities/curvy-splines-7038)
-[unity-ugui-XCharts](https://github.com/monitor1394/unity-ugui-XCharts)
+[ml-agents](https://github.com/Unity-Technologies/ml-agents)
+
+~~[Curvy Splines](https://assetstore.unity.com/packages/tools/utilities/curvy-splines-7038)~~
+
+~~[unity-ugui-XCharts](https://github.com/monitor1394/unity-ugui-XCharts)~~
