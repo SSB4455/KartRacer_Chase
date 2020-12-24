@@ -82,7 +82,8 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 					if (behaviorParameters)
 					{
 						behaviorParameters.TeamId = i;
-						waypointProgressTracker.behaviorType = behaviorParameters.BehaviorType = (Unity.MLAgents.Policies.BehaviorType)(int)(double)playerJson["BehaviorType"];
+						behaviorParameters.BehaviorType = (Unity.MLAgents.Policies.BehaviorType)(int)(double)playerJson["BehaviorType"];
+						waypointProgressTracker.behaviorType = (ArcadeKartAgent.BehaviorType)behaviorParameters.BehaviorType;
 						if (behaviorParameters.BehaviorType == BehaviorType.HeuristicOnly)
 						{
 							showCar = waypointProgressTracker;
