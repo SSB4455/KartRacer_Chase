@@ -121,14 +121,8 @@ namespace UnityStandardAssets.Utility
 				shadowRecordContent.ShadowRun(GetMatchTime());
 			}
 			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
-			if (recording)
-			{
-				recordingStringBuilder.Append("CarPosition\t").Append(GetMatchTime().Ticks).
-					Append(arcadeKart.transform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\t')).
-					Append(arcadeKart.transform.rotation.ToString().Replace("(", "").Replace(" ", "").Replace(')', '\t')).
-					Append(GetMatchProgress().ToString("f4")).
-					Append(arcadeKart.CarRigidbody.velocity.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\n'));
-			}
+
+			AddCarStatusRecord(GetMatchTime());
 			if (lastInWayRoutePoint.percent > 0.8f && inWayRoutePoint.percent < 0.2f)
 			{
 				finishLapCount++;
@@ -173,13 +167,26 @@ namespace UnityStandardAssets.Utility
 		{
 			if (record && vectorAction?.Length > 0)
 			{
-				recordingStringBuilder.Append("AgentActions\t").Append(GetMatchTime().Ticks).Append('\t');
+				TimeSpan time = GetMatchTime();
+				recordingStringBuilder.Append("AgentActions\t").Append(time.Ticks).Append('\t');
 				for (int i = 0; i < vectorAction?.Length; i++)
 				{
 					recordingStringBuilder.Append(vectorAction[i]).Append(',');
 				}
-				recordingStringBuilder.Remove(recordingStringBuilder.Length - 1, 1);
-				recordingStringBuilder.AppendLine();
+				recordingStringBuilder.Remove(recordingStringBuilder.Length - 1, 1).AppendLine();
+				AddCarStatusRecord(time);
+			}
+		}
+
+		void AddCarStatusRecord(TimeSpan time)
+		{
+			if (recording)
+			{
+				recordingStringBuilder.Append("CarStatus\t").Append(time.Ticks).
+					Append(arcadeKart.transform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\t')).
+					Append(arcadeKart.transform.rotation.ToString().Replace("(", "").Replace(" ", "").Replace(')', '\t')).
+					Append(GetMatchProgress().ToString("f4")).
+					Append(arcadeKart.CarRigidbody.velocity.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\n'));
 			}
 		}
 

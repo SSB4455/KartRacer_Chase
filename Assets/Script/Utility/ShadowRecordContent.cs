@@ -30,15 +30,13 @@ namespace UnityStandardAssets.Utility
 		int totalLapCount;
 		string matchId;
 		int totalCarCount;
-		Vector3 circuitPosition;
+		Vector3 shadowCircuitPosition;
 		TimeSpan finishCircuitTime;
 		bool shadowRecordAccordance;
 
 		Vector3 trackPositionOffset = Vector3.zero;
-		private TimePosition[] timePositions;
-		private TimeActions[] timeActionss;
-		int[] timePositionsOptimizedIndices = new int[100];
-		int[] timeActionssOptimizedIndices = new int[100];
+		private TimeCarStatus[] timeStatuss;
+		int[] timeStatussOptimizedIndices = new int[100];
 
 
 
@@ -53,9 +51,8 @@ namespace UnityStandardAssets.Utility
 				return;
 			}
 
-			List<TimePosition> timePositionList = new List<TimePosition>();
-			List<TimeActions> timeActionsList = new List<TimeActions>();
-
+			List<TimeCarStatus> timePositionList = new List<TimeCarStatus>();
+			float[] vectorAction = new float[2];
 			string[] lines = File.ReadAllLines(shadowRecordFilePath);
 			for (int i = 0; i < lines.Length; i++)
 			{
@@ -84,7 +81,7 @@ namespace UnityStandardAssets.Utility
 						case "TotalCarCount": totalCarCount = int.Parse(splits[1]); break;
 						case "CircuitPosition":
 							string[] dataSplits = splits[1].Split(',');
-							circuitPosition = new Vector3(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
+							shadowCircuitPosition = new Vector3(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
 							break;
 					}
 				}
@@ -94,141 +91,94 @@ namespace UnityStandardAssets.Utility
 					string[] dataSplits;
 					switch (splits[0])
 					{
-						case "CarPosition":
+						case "CarStatus":
 							time = new TimeSpan(long.Parse(splits[1]));
 							dataSplits = splits[2].Split(',');
 							Vector3 position = new Vector3(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
 							dataSplits = splits[3].Split(',');
-							//Quaternion rotation = new Quaternion(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]), float.Parse(dataSplits[3]));
+							Quaternion rotation = new Quaternion(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]), float.Parse(dataSplits[3]));
 							//float progress = float.Parse(dataSplits[4]);
 							//dataSplits = splits[5].Split(',');
 							//Vector3 velocity = new Vector3(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
-							timePositionList.Add(new TimePosition(time, position));
+							timePositionList.Add(new TimeCarStatus(time, position, rotation, vectorAction));
 							break;
 						case "AgentActions":
 							time = new TimeSpan(long.Parse(splits[1]));
 							dataSplits = splits[2].Split(',');
-							float[] vectorAction = new float[dataSplits.Length];
+							vectorAction = new float[dataSplits.Length];
 							for (int j = 0; j < dataSplits.Length; j++)
 							{
 								vectorAction[j] = float.Parse(dataSplits[j]);
 							}
-							timeActionsList.Add(new TimeActions(time, vectorAction));
 							break;
 					}
 				}
-				timePositions = timePositionList.ToArray();
-				timeActionss = timeActionsList.ToArray();
+				timeStatuss = timePositionList.ToArray();
 			}
 			finishCircuitTime = new TimeSpan(long.Parse(lines[lines.Length - 1].Split('\t')[1]));
 
-			CacheTimePrecent();
+			CacheTimeStatusPrecent();
 		}
 
-		private void CacheTimePrecent()
+		private void CacheTimeStatusPrecent()
 		{
-			for (int i = 1, j = 1; i < timePositionsOptimizedIndices.Length; i++)
+			for (int i = 1, j = 1; i < timeStatussOptimizedIndices.Length; i++)
 			{
-				timePositionsOptimizedIndices[i] = 0;
-				float samplePercent = (float)i / timePositionsOptimizedIndices.Length;
-				timePositionsOptimizedIndices[i] = j;
-				for (; j < timePositions.Length; j++)
+				timeStatussOptimizedIndices[i] = 0;
+				float samplePercent = (float)i / timeStatussOptimizedIndices.Length;
+				timeStatussOptimizedIndices[i] = j;
+				for (; j < timeStatuss.Length; j++)
 				{
-					if (((float)timePositions[j].time.Ticks / finishCircuitTime.Ticks) > samplePercent)
+					if (((float)timeStatuss[j].time.Ticks / finishCircuitTime.Ticks) > samplePercent)
 					{
 						break;
 					}
-					timePositionsOptimizedIndices[i] = j;
-				}
-			}
-			for (int i = 1, j = 1; i < timeActionssOptimizedIndices.Length; i++)
-			{
-				timeActionssOptimizedIndices[i] = 0;
-				float samplePercent = (float)i / timeActionssOptimizedIndices.Length;
-				timeActionssOptimizedIndices[i] = j;
-				for (; j < timeActionss.Length; j++)
-				{
-					if (((float)timeActionss[j].time.Ticks / finishCircuitTime.Ticks) > samplePercent)
-					{
-						break;
-					}
-					timeActionssOptimizedIndices[i] = j;
+					timeStatussOptimizedIndices[i] = j;
 				}
 			}
 		}
 
 		public Vector3 GetShadowCircuitPosition()
 		{
-			throw new NotImplementedException();
+			return shadowCircuitPosition;
 		}
 
-		public Vector3 GetShadowPositionOrgine(TimeSpan time)
+		public TimeCarStatus GetShadowStatusOrgine(TimeSpan time)
 		{
 			int precentIndex = (int)(time.Ticks * 100f / finishCircuitTime.Ticks);
 			precentIndex = Mathf.Max(0, precentIndex);
-			precentIndex = Mathf.Min(precentIndex, timePositionsOptimizedIndices.Length - 2);
-			int startIndex = timePositionsOptimizedIndices[precentIndex];
-			int endIndex = timePositionsOptimizedIndices[precentIndex + 1];
+			precentIndex = Mathf.Min(precentIndex, timeStatussOptimizedIndices.Length - 2);
+			int startIndex = timeStatussOptimizedIndices[precentIndex];
+			int endIndex = timeStatussOptimizedIndices[precentIndex + 1];
 			while (endIndex - startIndex > 1)
 			{
-				if (time <= timePositions[startIndex].time)
+				if (time <= timeStatuss[startIndex].time)
 				{
 					break;
 				}
-				else if (timePositions[endIndex].time <= time)
+				else if (timeStatuss[endIndex].time <= time)
 				{
 					break;
 				}
 				int midIndex = (startIndex + endIndex) / 2;
-				if (timePositions[midIndex].time < time)
+				if (timeStatuss[midIndex].time < time)
 				{
 					startIndex = midIndex;
 				} else {
 					endIndex = midIndex;
 				}
 			}
-			return TimePosition.LerpPositionInTime(timePositions[startIndex], timePositions[endIndex], time);
-		}
-
-		public Vector3 GetShadowPosition(TimeSpan time)
-		{
-			return GetShadowPositionOrgine(time) + trackPositionOffset;
-		}
-
-		public float[] GetShadowActions(TimeSpan time)
-		{
-			int precentIndex = (int)(time.Ticks * 100f / finishCircuitTime.Ticks);
-			precentIndex = Mathf.Max(0, precentIndex);
-			precentIndex = Mathf.Min(precentIndex, timeActionssOptimizedIndices.Length - 2);
-			int startIndex = timeActionssOptimizedIndices[precentIndex];
-			int endIndex = timeActionssOptimizedIndices[precentIndex + 1];
-			while (endIndex - startIndex > 1)
-			{
-				if (time <= timeActionss[startIndex].time)
-				{
-					break;
-				}
-				else if (timeActionss[endIndex].time <= time)
-				{
-					break;
-				}
-				int midIndex = (startIndex + endIndex) / 2;
-				if (timeActionss[midIndex].time < time)
-				{
-					startIndex = midIndex;
-				} else {
-					endIndex = midIndex;
-				}
-			}
-			return TimeActions.LerpActionsInTime(timeActionss[startIndex], timeActionss[endIndex], time);
+			return TimeCarStatus.LerpInTime(timeStatuss[startIndex], timeStatuss[endIndex], time);
 		}
 
 		public void ShadowRun(TimeSpan time)
 		{
-			agent.arcadeKart.transform.position = GetShadowPosition(time);
+			TimeCarStatus timeStatus = GetShadowStatusOrgine(time);
+			agent.arcadeKart.transform.position = timeStatus.position + trackPositionOffset;
+			agent.arcadeKart.transform.rotation = timeStatus.rotation;
 			if (agent.joystick)
 			{
-				float[] actions = GetShadowActions(time);
+				float[] actions = timeStatus.actions;
 				if (actions.Length >= 2)
 				{
 					agent.joystick.SystemMove(new Vector3(actions[0], actions[1], 0));
@@ -243,27 +193,38 @@ namespace UnityStandardAssets.Utility
 
 
 
-		public struct TimePosition
+		public struct TimeCarStatus
 		{
 			public TimeSpan time { get; private set; }
 			public Vector3 position { get; private set; }
-			//public Quaternion rotation { get; private set; }
+			public Quaternion rotation { get; private set; }
+			public float[] actions { get; private set; }
 
 
 
-			public TimePosition(TimeSpan time, Vector3 position)
+			public TimeCarStatus(TimeSpan time, Vector3 position, Quaternion rotation, float[] actions)
 			{
 				this.time = time;
 				this.position = position;
-				//this.rotation = rotation;
+				this.rotation = rotation;
+				this.actions = actions;
 			}
 
-			public static Vector3 LerpPosition(TimePosition a, TimePosition b, float lerp)
+			public static TimeCarStatus LerpInTime(TimeCarStatus a, TimeCarStatus b, TimeSpan time)
+			{
+				if (b.time <= a.time)
+				{
+					return b;
+				}
+				return new TimeCarStatus(time, LerpPositionInTime(a, b, time), LerpRotationInTime(a, b, time), LerpActionsInTime(a, b, time));
+			}
+
+			public static Vector3 LerpPosition(TimeCarStatus a, TimeCarStatus b, float lerp)
 			{
 				return Vector3.Lerp(a.position, b.position, lerp);
 			}
 
-			public static Vector3 LerpPositionInTime(TimePosition a, TimePosition b, TimeSpan time)
+			public static Vector3 LerpPositionInTime(TimeCarStatus a, TimeCarStatus b, TimeSpan time)
 			{
 				if (b.time <= a.time)
 				{
@@ -271,23 +232,22 @@ namespace UnityStandardAssets.Utility
 				}
 				return LerpPosition(a, b, (long)(time - a.time).Ticks / (b.time - a.time).Ticks);
 			}
-		}
 
-
-		public struct TimeActions
-		{
-			public TimeSpan time { get; private set; }
-			public float[] actions { get; private set; }
-
-
-
-			public TimeActions(TimeSpan time, float[] actions)
+			public static Quaternion LerpRotation(TimeCarStatus a, TimeCarStatus b, float lerp)
 			{
-				this.time = time;
-				this.actions = actions;
+				return Quaternion.Lerp(a.rotation, b.rotation, lerp);
 			}
 
-			public static float[] LerpActions(TimeActions a, TimeActions b, float lerp)
+			public static Quaternion LerpRotationInTime(TimeCarStatus a, TimeCarStatus b, TimeSpan time)
+			{
+				if (b.time <= a.time)
+				{
+					return b.rotation;
+				}
+				return LerpRotation(a, b, (long)(time - a.time).Ticks / (b.time - a.time).Ticks);
+			}
+
+			public static float[] LerpActions(TimeCarStatus a, TimeCarStatus b, float lerp)
 			{
 				int minLength = Mathf.Min(a.actions.Length, b.actions.Length);
 				float[] lerpActions = new float[minLength];
@@ -298,7 +258,7 @@ namespace UnityStandardAssets.Utility
 				return lerpActions;
 			}
 
-			public static float[] LerpActionsInTime(TimeActions a, TimeActions b, TimeSpan time)
+			public static float[] LerpActionsInTime(TimeCarStatus a, TimeCarStatus b, TimeSpan time)
 			{
 				if (b.time <= a.time)
 				{
