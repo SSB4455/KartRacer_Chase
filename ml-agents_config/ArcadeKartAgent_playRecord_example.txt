@@ -13,9 +13,9 @@ BehaviorType	0	//AgentBehaviorType	0-Default 1-HeuristicOnly 2-InferenceOnly
 TotalLapCount	1	//跑几圈
 MatchId	20201217ttcwdf01	//比赛的id所有参加这场比赛的车辆都会有同样的比赛id
 TotalCarCount	1	//总共有几辆赛车参加比赛
+CircuitPosition	0.0,0.0,0	//赛道的位置
 
-CircuitPosition	0.1,0.1,0	//赛道的位置
-CarPosition	12313242332	3.5,12,0.3	0	0,0,0	//从比赛开始的时间戳	位置	比赛进度	三维速度
-
+CarPosition	1363343	3.5,12,0.3	0.0,0.7,0.0,0.7	0	0,0,0	//从比赛开始的时间戳	位置	旋转	比赛进度	三维速度
+AgentActions	1363343	0.1,-0.8	//从比赛开始的时间戳	操作(x轴,y轴)
 
 FinishCircuitTime	505363343	00:00:50.5363343	//完成的全部耗时	耗时时间戳	小时分钟秒毫秒格式

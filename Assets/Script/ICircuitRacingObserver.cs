@@ -33,4 +33,5 @@ public interface ICircuitRacingObserver
 
 	float GetForwardSpeed();
 	ArcadeKartAgent.BehaviorType GetBehaviorType();
+	void SetShadowAction(float[] vectorAction);
 }

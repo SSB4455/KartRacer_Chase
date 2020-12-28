@@ -84,6 +84,13 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 						behaviorParameters.TeamId = i;
 						behaviorParameters.BehaviorType = (Unity.MLAgents.Policies.BehaviorType)(int)(double)playerJson["BehaviorType"];
 						waypointProgressTracker.behaviorType = (ArcadeKartAgent.BehaviorType)behaviorParameters.BehaviorType;
+						if (playerJson.ContainsKey("ShadowRecordFilePath") && !string.IsNullOrEmpty((string)playerJson["ShadowRecordFilePath"]))
+						{
+							behaviorParameters.BehaviorType = BehaviorType.HeuristicOnly;
+							waypointProgressTracker.record = false;
+							waypointProgressTracker.behaviorType = ArcadeKartAgent.BehaviorType.ShadowPlay;
+							waypointProgressTracker.shadowRecordContent = new ShadowRecordContent((string)playerJson["ShadowRecordFilePath"], agent, Track);
+						}
 						if (behaviorParameters.BehaviorType == BehaviorType.HeuristicOnly)
 						{
 							showCar = waypointProgressTracker;

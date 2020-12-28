@@ -54,6 +54,7 @@ public class ArcadeKartAgent : Agent, IInput
 		arcadeKart.CarRigidbody.velocity = Vector3.zero;
 
 		syncActionToUI = !Application.isMobilePlatform || racingObserver.GetBehaviorType() != ArcadeKartAgent.BehaviorType.HeuristicOnly;
+		this.enabled = racingObserver.GetBehaviorType() != ArcadeKartAgent.BehaviorType.ShadowPlay;
 	}
 
 	/*public new void AddReward(float increment)
@@ -114,6 +115,7 @@ public class ArcadeKartAgent : Agent, IInput
 		// Actions, size = 2
 		agentInput.x = vectorAction[0];
 		agentInput.y = vectorAction[1];
+		racingObserver.SetShadowAction(vectorAction);
 		if (syncActionToUI && joystick)
 		{
 			joystick.SystemMove(new Vector3(vectorAction[0], vectorAction[1], 0));

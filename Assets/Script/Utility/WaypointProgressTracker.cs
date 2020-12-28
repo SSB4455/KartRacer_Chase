@@ -16,7 +16,7 @@ namespace UnityStandardAssets.Utility
 		public WaypointCircuit circuit; // A reference to the waypoint-based route we should follow
 		public KartGame.KartSystems.ArcadeKart arcadeKart;
 		internal ArcadeKartAgent.BehaviorType behaviorType;
-		internal string shadowRecordFilePath;
+		internal ShadowRecordContent shadowRecordContent;
 
 		// these are public, readable by other objects - i.e. for an AI to know where to head!
 		public WaypointCircuit.RoutePoint inWayRoutePoint { get; private set; }
@@ -32,7 +32,7 @@ namespace UnityStandardAssets.Utility
 		internal GamePlayingManager.IPlayingManager iPlayingManager;
 		public bool record = true;
 		bool recording;
-		StringBuilder playRecordString;
+		StringBuilder recordingStringBuilder;
 
 
 
@@ -68,23 +68,23 @@ namespace UnityStandardAssets.Utility
 
 			if (record)
 			{
-				playRecordString = new StringBuilder();
-				playRecordString.Append("PlayTime\t").AppendLine(DateTime.Now.Ticks.ToString());
-				playRecordString.Append("TimeScale\t").AppendLine(Time.timeScale.ToString());
-				playRecordString.Append("CircuitName\t").AppendLine(circuit.trackName);
-				playRecordString.Append("CircuitId\t").AppendLine(circuit.Id);
-				playRecordString.Append("CircuitVersion\t").AppendLine("0\t//circuit.Version未完成");
-				playRecordString.Append("CircuitLength\t").AppendLine(circuit.CircuitLength.ToString());
-				playRecordString.Append("PlayerName\t").AppendLine(arcadeKart.name);
-				playRecordString.Append("CarName\t").AppendLine(arcadeKart.name);
-				playRecordString.Append("AgentName\t").AppendLine("ArcadeKartAgent\t//AgentName未完成");
-				playRecordString.Append("ModelName\t").AppendLine("AI_Racer1\t//ModelName未完成");
-				playRecordString.Append("ModelMD5\t").AppendLine("ModelMD5未完成");
-				playRecordString.Append("BehaviorType\t").Append((int)behaviorType).AppendLine("\t//0-Default 1-HeuristicOnly 2-InferenceOnly");
-				playRecordString.Append("TotalLapCount\t").AppendLine(totalLapCount.ToString());
-				playRecordString.Append("MatchId\t").AppendLine(iPlayingManager.GetMatchId());
-				playRecordString.Append("TotalCarCount\t").AppendLine(iPlayingManager.GetRacingCarCount().ToString());
-				playRecordString.Append("CircuitPosition").Append(circuit.trackTransform.position.ToString().Replace('(', '\t').Replace(')', '\n'));
+				recordingStringBuilder = new StringBuilder();
+				recordingStringBuilder.Append("PlayTime\t").AppendLine(DateTime.Now.Ticks.ToString());
+				recordingStringBuilder.Append("TimeScale\t").AppendLine(Time.timeScale.ToString());
+				recordingStringBuilder.Append("CircuitName\t").AppendLine(circuit.trackName);
+				recordingStringBuilder.Append("CircuitId\t").AppendLine(circuit.Id);
+				recordingStringBuilder.Append("CircuitVersion\t").AppendLine("0\t//circuit.Version未完成");
+				recordingStringBuilder.Append("CircuitLength\t").AppendLine(circuit.CircuitLength.ToString());
+				recordingStringBuilder.Append("PlayerName\t").AppendLine(arcadeKart.name);
+				recordingStringBuilder.Append("CarName\t").AppendLine(arcadeKart.name);
+				recordingStringBuilder.Append("AgentName\t").AppendLine("ArcadeKartAgent\t//AgentName未完成");
+				recordingStringBuilder.Append("ModelName\t").AppendLine("AI_Racer1\t//ModelName未完成");
+				recordingStringBuilder.Append("ModelMD5\t").AppendLine("ModelMD5未完成");
+				recordingStringBuilder.Append("BehaviorType\t").Append((int)behaviorType).AppendLine("\t//0-Default 1-HeuristicOnly 2-InferenceOnly");
+				recordingStringBuilder.Append("TotalLapCount\t").AppendLine(totalLapCount.ToString());
+				recordingStringBuilder.Append("MatchId\t").AppendLine(iPlayingManager.GetMatchId());
+				recordingStringBuilder.Append("TotalCarCount\t").AppendLine(iPlayingManager.GetRacingCarCount().ToString());
+				recordingStringBuilder.Append("CircuitPosition").AppendLine(circuit.trackTransform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\n'));
 				recording = true;
 			}
 		}
@@ -116,11 +116,16 @@ namespace UnityStandardAssets.Utility
 
 		private void Update()
 		{
-			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
-			if (record && recording)
+			if (behaviorType == ArcadeKartAgent.BehaviorType.ShadowPlay)
 			{
-				playRecordString.Append("CarPosition\t").Append(GetMatchTime().Ticks).
+				shadowRecordContent.ShadowRun(GetMatchTime());
+			}
+			inWayRoutePoint = circuit.GetRoutePoint(arcadeKart.transform.position);
+			if (recording)
+			{
+				recordingStringBuilder.Append("CarPosition\t").Append(GetMatchTime().Ticks).
 					Append(arcadeKart.transform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\t')).
+					Append(arcadeKart.transform.rotation.ToString().Replace("(", "").Replace(" ", "").Replace(')', '\t')).
 					Append(GetMatchProgress().ToString("f4")).
 					Append(arcadeKart.CarRigidbody.velocity.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\n'));
 			}
@@ -141,17 +146,17 @@ namespace UnityStandardAssets.Utility
 					{
 						matchFinishTime = DateTime.Now - startTime;
 						iPlayingManager.MatchFinish(this);
-						if (recording)
+						if (record)
 						{
 							recording = false;
-							playRecordString.Append("FinishCircuitTime\t").Append(GetMatchTime().Ticks).Append('\t').Append(GetMatchTime());
+							recordingStringBuilder.Append("FinishCircuitTime\t").Append(GetMatchTime().Ticks).Append('\t').Append(GetMatchTime());
 							string recordFilePath = Path.Combine(Application.persistentDataPath, "ml-agents_config",
 								"ArcadeKartAgent_playRecord_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt");
 #if UNITY_EDITOR
 							recordFilePath = Path.Combine(Directory.GetParent(Application.dataPath).ToString(), "ml-agents_config", 
 								"ArcadeKartAgent_playRecord_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".txt");
 #endif
-							File.WriteAllText(recordFilePath, playRecordString.ToString());
+							File.WriteAllText(recordFilePath, recordingStringBuilder.ToString());
 						}
 					}
 				}
@@ -162,6 +167,20 @@ namespace UnityStandardAssets.Utility
 			}
 			lastInWayRoutePoint = inWayRoutePoint;
 			//Debug.Log("finishLoopCount = " + finishLoopCount + "\t LoopProgress = " + GetLoopProgress());
+		}
+
+		public void SetShadowAction(float[] vectorAction)
+		{
+			if (record && vectorAction?.Length > 0)
+			{
+				recordingStringBuilder.Append("AgentActions\t").Append(GetMatchTime().Ticks).Append('\t');
+				for (int i = 0; i < vectorAction?.Length; i++)
+				{
+					recordingStringBuilder.Append(vectorAction[i]).Append(',');
+				}
+				recordingStringBuilder.Remove(recordingStringBuilder.Length - 1, 1);
+				recordingStringBuilder.AppendLine();
+			}
 		}
 
 		public float GetForwardSpeed()

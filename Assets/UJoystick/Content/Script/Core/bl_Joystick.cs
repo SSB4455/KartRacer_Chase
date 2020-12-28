@@ -70,9 +70,9 @@ public class bl_Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         }
     }
 
-    internal void SystemControl(bool isSystemControl)
+    internal void UseSystemControl(bool useSystemControl)
     {
-		this.isSystemControl = isSystemControl;
+		this.isSystemControl = useSystemControl;
 	}
 
 	internal void SystemMove(Vector3 move)

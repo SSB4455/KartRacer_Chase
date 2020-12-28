@@ -67,7 +67,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 			recordDetail.carName = recordContentLines[7].Split('\t')[1];
 			recordDetail.modelName = recordContentLines[9].Split('\t')[1];
 			recordDetail.behaviorType = int.Parse(recordContentLines[11].Split('\t')[1]);
-			recordDetail.finishCircuitTime = new DateTime(long.Parse(recordContentLines[recordContentLines.Count - 1].Split('\t')[1]));
+			recordDetail.finishCircuitTime = new TimeSpan(long.Parse(recordContentLines[recordContentLines.Count - 1].Split('\t')[1]));
 			recordDetail.recordToggleScript = Instantiate<RecordToggleScript>(togglePrefab);
 			recordDetail.recordToggleScript.recordToggle.group = recordFileToggleGroup;
 			recordDetail.recordToggleScript.transform.SetParent(recordFileToggleGroup.transform);
@@ -220,7 +220,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 		Vector3 circuitPosition;//	0.1,0.1,0	//赛道的位置
 								//CarPosition	12313242332	3.5,12,0.3	0	0,0,0	//从比赛开始的时间戳	位置	比赛进度	三维速度
 
-		internal DateTime finishCircuitTime;//	505363343	00:00:50.5363343	//完成的全部耗时	耗时时间戳	小时分钟秒毫秒格式
+		internal TimeSpan finishCircuitTime;//	505363343	00:00:50.5363343	//完成的全部耗时	耗时时间戳	小时分钟秒毫秒格式
 
 		internal RecordToggleScript recordToggleScript;
 	}

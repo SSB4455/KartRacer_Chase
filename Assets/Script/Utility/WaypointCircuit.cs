@@ -27,7 +27,6 @@ namespace UnityStandardAssets.Utility
 		{
 			get
 			{
-				System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 				string str = trackName;
 				for (int i = 0; i < wayCheckPoints.Length; i++)
 				{
