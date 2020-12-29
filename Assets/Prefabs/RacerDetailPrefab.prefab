@@ -88,7 +88,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundImage: {fileID: 4255401095620036226}
-  Text: {fileID: 4255401096179853073}
+  detailText: {fileID: 4255401096179853073}
 --- !u!114 &4255401095620036228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,7 +141,7 @@ GameObject:
   - component: {fileID: 4255401096179853072}
   - component: {fileID: 4255401096179853073}
   m_Layer: 5
-  m_Name: Text
+  m_Name: DetailText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

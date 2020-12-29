@@ -7,13 +7,13 @@ using UnityEngine.UI;
 public class RacerDetailScript : MonoBehaviour
 {
 	public Image backgroundImage;
-	[SerializeField] private Text Text;
+	[SerializeField] private Text detailText;
 	string carName;
 	public string CarName{
 		set
 		{
 			carName = value;
-			Text.text = ToString();
+			detailText.text = ToString();
 		}
 		get { return carName; }
 	}
@@ -23,7 +23,7 @@ public class RacerDetailScript : MonoBehaviour
 		set
 		{
 			modelName = value;
-			Text.text = ToString();
+			detailText.text = ToString();
 		}
 		get { return modelName; }
 	}
@@ -33,7 +33,7 @@ public class RacerDetailScript : MonoBehaviour
 		set
 		{
 			behaviorType = (Unity.MLAgents.Policies.BehaviorType)value;
-			Text.text = ToString();
+			detailText.text = ToString();
 		}
 		get { return (int)behaviorType; }
 	}
@@ -44,7 +44,7 @@ public class RacerDetailScript : MonoBehaviour
 		set
 		{
 			shadowRecordFilePath = value;
-			Text.text = ToString();
+			detailText.text = ToString();
 		}
 		get { return shadowRecordFilePath; }
 	}
