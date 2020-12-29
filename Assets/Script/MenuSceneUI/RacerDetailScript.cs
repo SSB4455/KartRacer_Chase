@@ -58,7 +58,7 @@ public class RacerDetailScript : MonoBehaviour
 		if (IsShdowRecord)
 		{
 			System.IO.FileInfo fileInfo = new System.IO.FileInfo(shadowRecordFilePath);
-			str = "shadow : " + str + "\n" + fileInfo.Name.Replace("ArcadeKartAgent_playRecord_", "").Replace(".txt", "");
+			str = "shadow : " + str + "\n" + fileInfo.Name.Replace("ArcadeKartAgent_", "").Replace(".txt", "");
 		}
 		return str;
 	}

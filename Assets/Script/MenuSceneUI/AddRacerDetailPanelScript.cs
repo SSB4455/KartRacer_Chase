@@ -24,7 +24,6 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 	public Image shadowModeBackgroundImage;
 	public ToggleGroup recordFileToggleGroup;
 	public RecordToggleScript togglePrefab;
-	List<RecordToggleScript> toggleList = new List<RecordToggleScript>();
 	List<RecordToggleScript> recordFileList = new List<RecordToggleScript>();
 	RecordDetail[] allRecords;
 

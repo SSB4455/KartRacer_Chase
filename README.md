@@ -5,14 +5,12 @@
 多个AI车手互相驾驶
 玩家在赛道内驾驶车辆AI车手模仿并学习驾驶
 
-![Snipaste_2020-11-24_15-38-34](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-38-34.png?raw=true)
-![Snipaste_2020-11-24_15-42-17](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-42-17.png?raw=true)
+![Snipaste_2020-11-24_15-38-34](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-38-34.png?raw=true)![Snipaste_2020-11-24_15-42-17](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-42-17.png?raw=true)
 
 ## 下一步要做
 
 - 回放赛车的行驶记录
   - 影子回放时卡顿问题
-  - 行驶记录过多时显示滚动条
   - 和正常车辆一起并不发生碰撞
   - 动画同步操作记录
   - 影子车辆半透明
@@ -57,6 +55,7 @@
   - 设置训练信息是否显示等参数
   - 最多能够增加到两个车手(一个推理一个操作)
   - 能够设置回放影子记录
+  - 行驶记录过多时显示滚动条
 - 搭建简单赛道(拥有赛道外墙壁 使赛车无法穿越)
   - 修复工程内赛道Prefab
 - 训练默认AI车手
