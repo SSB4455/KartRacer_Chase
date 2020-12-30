@@ -37,7 +37,16 @@ public class RacerDetailScript : MonoBehaviour
 		}
 		get { return (int)behaviorType; }
 	}
-	internal string playerName;
+	string playerName;
+	internal string PlayerName
+	{
+		set
+		{
+			playerName = value;
+			detailText.text = ToString();
+		}
+		get { return playerName; }
+	}
 	string shadowRecordFilePath;
 	internal string ShadowRecordFilePath
 	{
@@ -54,11 +63,11 @@ public class RacerDetailScript : MonoBehaviour
 
 	new string ToString()
 	{
-		string str = carName + "\n" + modelName + "\n" + behaviorType.ToString();
+		string str = playerName + "\n" + carName + "\n" + modelName + "\n" + behaviorType.ToString();
 		if (IsShdowRecord)
 		{
 			System.IO.FileInfo fileInfo = new System.IO.FileInfo(shadowRecordFilePath);
-			str = "shadow : " + str + "\n" + fileInfo.Name.Replace("ArcadeKartAgent_", "").Replace(".txt", "");
+			str += "\n" + fileInfo.Name.Replace("ArcadeKartAgent_", "").Replace(".txt", "");
 		}
 		return str;
 	}

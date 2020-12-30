@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace KartGame.KartSystems
 {
@@ -80,6 +81,7 @@ namespace KartGame.KartSystems
 			}
         }
 
+        public Text playerNameText;
         public Rigidbody CarRigidbody { get; private set; }
         public Vector2 Input       { get; private set; }
         public float AirPercent    { get; private set; }

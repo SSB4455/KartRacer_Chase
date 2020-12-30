@@ -186,8 +186,7 @@ namespace UnityStandardAssets.Utility
 			agent.arcadeKart.transform.position = timeStatus.position + trackPositionOffset;
 			agent.arcadeKart.transform.rotation = timeStatus.rotation;
 			float[] actions = timeStatus.actions;
-			shadowRecordInput.inputX = actions[0];
-			shadowRecordInput.inputY = actions[1];
+			agent.OnActionReceived(actions);
 			if (agent.joystick)
 			{
 				if (actions.Length >= 2)

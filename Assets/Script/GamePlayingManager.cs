@@ -15,7 +15,6 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 	internal WaypointCircuit Track { private set; get; }
 	public Unity.Barracuda.NNModel[] agentModels;
 	public GameObject arcadeKartPrefab;
-	//public GameObject gamingUIPrefab;
 	public GamingUI gamingUI;
 
 	string matchId;
@@ -69,11 +68,12 @@ public class GamePlayingManager : MonoBehaviour, GamePlayingManager.IPlayingMana
 			{
 				Hashtable playerJson = playerList[i] as Hashtable;
 				GameObject arcadeKart = Instantiate(arcadeKartPrefab);
-				arcadeKart.name = (string)playerJson["PlayerName"] + "_" + (string)playerJson["Car"] + "_" + i;
+				arcadeKart.name += "|" + (string)playerJson["PlayerName"] + "_" + i;
 				WaypointProgressTracker waypointProgressTracker = arcadeKart.GetComponent<WaypointProgressTracker>();
 				ArcadeKartAgent agent = arcadeKart.GetComponent<ArcadeKartAgent>();
 				if (waypointProgressTracker && agent)
 				{
+					agent.arcadeKart.playerNameText.text = (string)playerJson["PlayerName"];
 					waypointProgressTracker.iPlayingManager = this;
 					waypointProgressTracker.circuit = Track;
 					waypointProgressTracker.totalLapCount = (int)(double)gameParamJson["TotalLapCount"];

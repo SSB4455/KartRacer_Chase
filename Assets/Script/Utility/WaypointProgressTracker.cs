@@ -75,8 +75,8 @@ namespace UnityStandardAssets.Utility
 				recordingStringBuilder.Append("CircuitId\t").AppendLine(circuit.Id);
 				recordingStringBuilder.Append("CircuitVersion\t").AppendLine("0\t//circuit.Version未完成");
 				recordingStringBuilder.Append("CircuitLength\t").AppendLine(circuit.CircuitLength.ToString());
-				recordingStringBuilder.Append("PlayerName\t").AppendLine(arcadeKart.name);
-				recordingStringBuilder.Append("CarName\t").AppendLine(arcadeKart.name);
+				recordingStringBuilder.Append("PlayerName\t").AppendLine(arcadeKart.playerNameText.text);
+				recordingStringBuilder.Append("CarName\t").AppendLine(arcadeKart.name.Split('|')[0]);
 				recordingStringBuilder.Append("AgentName\t").AppendLine("ArcadeKartAgent\t//AgentName未完成");
 				recordingStringBuilder.Append("ModelName\t").AppendLine("AI_Racer1\t//ModelName未完成");
 				recordingStringBuilder.Append("ModelMD5\t").AppendLine("ModelMD5未完成");

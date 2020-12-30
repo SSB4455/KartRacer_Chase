@@ -45,7 +45,7 @@ public class MenuSceneScript : MonoBehaviour
 		racerDetail.transform.SetParent(addRacerButton.transform.parent);
 		racerDetail.transform.localScale = Vector3.one;
 		racerDetail.transform.SetSiblingIndex(addRacerButton.transform.parent.childCount - 2);
-		racerDetail.playerName = "欧阳双钻";
+		racerDetail.PlayerName = "欧阳双钻";
 		racerDetail.CarName = "KartClassic";
 		racerDetail.ModelName= "AI_Racer1";
 		racerDetail.BehaviorType = (int)Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
@@ -118,7 +118,7 @@ public class MenuSceneScript : MonoBehaviour
 		foreach (RacerDetailScript racerDetail in racerDetailList)
 		{
 			Hashtable playerJson = new Hashtable() {
-				{ "PlayerName", racerDetail.playerName },
+				{ "PlayerName", racerDetail.PlayerName },
 				{ "Car", racerDetail.CarName },
 				{ "AgentModel", racerDetail.ModelName },
 				{ "BehaviorType", racerDetail.BehaviorType },

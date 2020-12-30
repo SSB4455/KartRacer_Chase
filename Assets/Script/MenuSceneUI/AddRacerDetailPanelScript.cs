@@ -15,6 +15,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 	public Button driveModeButton;
 	public Button shadowModeButton;
 	public Image driveModeBackgroundImage;
+	public InputField playerNameInputField;
 	public Dropdown carDropdown;
 	public Dropdown agentModelDropdown;
 	public Dropdown behaviorTypeDropdown;
@@ -63,6 +64,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 				}
 			}
 			recordDetail.filePath = recordFiles[i];
+			recordDetail.playerName = recordContentLines[6].Split('\t')[1];
 			recordDetail.carName = recordContentLines[7].Split('\t')[1];
 			recordDetail.modelName = recordContentLines[9].Split('\t')[1];
 			recordDetail.behaviorType = int.Parse(recordContentLines[11].Split('\t')[1]);
@@ -72,7 +74,8 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 			recordDetail.recordToggleScript.transform.SetParent(recordFileToggleGroup.transform);
 			recordDetail.recordToggleScript.transform.localScale = Vector3.one;
 			recordDetail.recordToggleScript.gameObject.SetActive(false);
-			recordDetail.recordToggleScript.recordText.text = recordDetail.carName + "\n" + recordDetail.modelName + "\n" + recordDetail.playTime.ToString("yyyy-MM-dd HH:mm:ss");
+			recordDetail.recordToggleScript.recordText.text = recordDetail.playerName + "\n" + recordDetail.carName + 
+				"\n" + recordDetail.modelName + "\n" + recordDetail.finishCircuitTime.ToString("mm':'ss':'fff") + "\n" + recordDetail.playTime.ToString("yyyy-MM-dd HH:mm:ss");
 			allRecords[i] = recordDetail;
 		}
 	}
@@ -109,9 +112,10 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 		shadowModeBackgroundImage.gameObject.SetActive(detailIsShadow);
 		if (!racerDetail.IsShdowRecord)
 		{
-			if (!string.IsNullOrEmpty(racerDetail.playerName))
+			if (!string.IsNullOrEmpty(racerDetail.PlayerName))
 			{
 				deleteRacerDetailButton.gameObject.SetActive(true);
+				playerNameInputField.text = racerDetail.PlayerName;
 
 				//同步显示选中的车辆
 				//同步显示选中的AI模型
@@ -152,7 +156,8 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 
 		if (!detailIsShadow)
 		{
-			racerDetail.playerName = "欧阳双钻";
+			racerDetail.PlayerName = playerNameInputField.text;
+			playerNameInputField.text = "欧阳双钻";
 			racerDetail.CarName = carDropdown.options[carDropdown.value].text;
 			racerDetail.ModelName = agentModelDropdown.options[agentModelDropdown.value].text;
 			racerDetail.BehaviorType = behaviorTypeDropdown.value;
@@ -163,7 +168,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 			{
 				if (allRecords[i].recordToggleScript.recordToggle.isOn)
 				{
-					racerDetail.playerName = "shadow";
+					racerDetail.PlayerName = allRecords[i].playerName + "(shadow)";
 					racerDetail.CarName = allRecords[i].carName;
 					racerDetail.ModelName = allRecords[i].modelName;
 					racerDetail.BehaviorType = allRecords[i].behaviorType;
@@ -182,7 +187,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 	{
 		gameObject.SetActive(false);
 		racerDetail.gameObject.SetActive(true);
-		if (string.IsNullOrEmpty(racerDetail.playerName))
+		if (string.IsNullOrEmpty(racerDetail.PlayerName))
 		{
 			Destroy(racerDetail.gameObject);
 		}
@@ -206,7 +211,7 @@ public class AddRacerDetailPanelScript : MonoBehaviour
 		internal DateTime playTime;        //启动时间
 		int timeScale;  //时间缩放倍数
 		internal UnityStandardAssets.Utility.WaypointCircuit circuit;   //赛道
-		string playerName;// 欧阳双钻 //玩家的名字
+		internal string playerName;// 欧阳双钻 //玩家的名字
 		internal string carName;// KartClassic //车的名字
 		string agentName;// ArcadeKartAgent //AgentName
 		internal string modelName;// AI_Racer1 //ModelName

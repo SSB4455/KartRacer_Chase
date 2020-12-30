@@ -4,8 +4,8 @@ CircuitName	OvalTrack
 CircuitId	f7f6758f18cd145722af32d2174f27c6
 CircuitVersion	0	//circuit.Version未完成
 CircuitLength	278.9362
-PlayerName	欧阳双钻_KartClassic_0
-CarName	欧阳双钻_KartClassic_0
+PlayerName	欧阳双钻
+CarName	KartClassic
 AgentName	ArcadeKartAgent	//AgentName未完成
 ModelName	AI_Racer1	//ModelName未完成
 ModelMD5	ModelMD5未完成
