@@ -184,7 +184,7 @@ namespace UnityStandardAssets.Utility
 			{
 				recordingStringBuilder.Append("CarStatus\t").Append(time.Ticks).
 					Append(arcadeKart.transform.position.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\t')).
-					Append(arcadeKart.transform.rotation.ToString().Replace("(", "").Replace(" ", "").Replace(')', '\t')).
+					Append(arcadeKart.transform.rotation.eulerAngles.ToString().Replace("(", "").Replace(" ", "").Replace(')', '\t')).
 					Append(GetMatchProgress().ToString("f4")).
 					Append(arcadeKart.CarRigidbody.velocity.ToString().Replace('(', '\t').Replace(" ", "").Replace(')', '\n'));
 			}

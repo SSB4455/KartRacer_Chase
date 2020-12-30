@@ -2,7 +2,6 @@
 SSBB4455 2020-12-23
 */
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace UnityStandardAssets.Utility
 	{
 		string shadowRecordFilePath;
 		private ArcadeKartAgent agent;
-
+		ShadowRecordInput shadowRecordInput;
 
 		DateTime playTime;
 		float timeScale;
@@ -96,7 +95,7 @@ namespace UnityStandardAssets.Utility
 							dataSplits = splits[2].Split(',');
 							Vector3 position = new Vector3(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
 							dataSplits = splits[3].Split(',');
-							Quaternion rotation = new Quaternion(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]), float.Parse(dataSplits[3]));
+							Quaternion rotation = Quaternion.Euler(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
 							//float progress = float.Parse(dataSplits[4]);
 							//dataSplits = splits[5].Split(',');
 							//Vector3 velocity = new Vector3(float.Parse(dataSplits[0]), float.Parse(dataSplits[1]), float.Parse(dataSplits[2]));
@@ -117,7 +116,17 @@ namespace UnityStandardAssets.Utility
 			}
 			finishCircuitTime = new TimeSpan(long.Parse(lines[lines.Length - 1].Split('\t')[1]));
 
+			shadowRecordInput = agent.gameObject.GetComponent<ShadowRecordInput>();
+
 			CacheTimeStatusPrecent();
+
+			Collider[] colliders = agent.arcadeKart.GetComponentsInChildren<Collider>();
+			for (int i = 0; i < colliders.Length; i++)
+			{
+				colliders[i].enabled = false;
+			}
+			//agent.arcadeKart.CarRigidbody.mass = 0;
+
 		}
 
 		private void CacheTimeStatusPrecent()
@@ -176,9 +185,11 @@ namespace UnityStandardAssets.Utility
 			TimeCarStatus timeStatus = GetShadowStatusOrgine(time);
 			agent.arcadeKart.transform.position = timeStatus.position + trackPositionOffset;
 			agent.arcadeKart.transform.rotation = timeStatus.rotation;
+			float[] actions = timeStatus.actions;
+			shadowRecordInput.inputX = actions[0];
+			shadowRecordInput.inputY = actions[1];
 			if (agent.joystick)
 			{
-				float[] actions = timeStatus.actions;
 				if (actions.Length >= 2)
 				{
 					agent.joystick.SystemMove(new Vector3(actions[0], actions[1], 0));
