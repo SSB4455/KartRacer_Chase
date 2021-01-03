@@ -5,7 +5,7 @@
 多个AI车手互相驾驶
 玩家在赛道内驾驶车辆AI车手模仿并学习驾驶
 
-![Snipaste_2020-11-24_15-38-34](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-38-34.png?raw=true)![Snipaste_2020-11-24_15-42-17](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-42-17.png?raw=true)
+![Snipaste_2020-11-24_15-38-34](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-11-24_15-38-34.png?raw=true)![Snipaste_2020-11-24_15-42-17](https://github.com/SSB4455/KartRacer_Chase/blob/master/Screenshot/Snipaste_2020-12-05_09-41-37.png?raw=true)
 
 ## 下一步要做
 
