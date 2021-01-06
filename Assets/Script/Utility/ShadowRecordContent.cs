@@ -12,7 +12,6 @@ namespace UnityStandardAssets.Utility
 	{
 		string shadowRecordFilePath;
 		private ArcadeKartAgent agent;
-		ShadowRecordInput shadowRecordInput;
 
 		DateTime playTime;
 		float timeScale;
@@ -115,8 +114,6 @@ namespace UnityStandardAssets.Utility
 				timeStatuss = timePositionList.ToArray();
 			}
 			finishCircuitTime = new TimeSpan(long.Parse(lines[lines.Length - 1].Split('\t')[1]));
-
-			shadowRecordInput = agent.gameObject.GetComponent<ShadowRecordInput>();
 
 			CacheTimeStatusPrecent();
 

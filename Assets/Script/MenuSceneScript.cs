@@ -19,7 +19,9 @@ public class MenuSceneScript : MonoBehaviour
 	public Text trackInfoText;
 	public InputField totalLapCountInputField;
 	public AddRacerDetailPanelScript addRacerDetailPanelScript;
+	public Button createOnlineRoomButton;
 	public Button addRacerButton;
+	public Toggle isTrainingToggle;
 	public Toggle savePlayRecordToggle;
 	List<RacerDetailScript> racerDetailList = new List<RacerDetailScript>();
 	int racerCountLimit = 2;
@@ -51,10 +53,15 @@ public class MenuSceneScript : MonoBehaviour
 		racerDetail.BehaviorType = (int)Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
 		racerDetail.gameObject.SetActive(true);
 		AddRacerDetail(racerDetail);
+
 	}
 
 	public void ChangeTrackButton(int moveOffset)
 	{
+		if (InOnlineRoom)
+		{
+			return;
+		}
 		if (trackObj)
 		{
 			if (moveOffset == 0)
@@ -70,7 +77,7 @@ public class MenuSceneScript : MonoBehaviour
 		currentIndex = currentIndex < 0 ? currentIndex + trackPrefabs.Length : currentIndex;
 
 		trackObj = Instantiate<WaypointCircuit>(trackPrefabs[currentIndex]);
-		trackInfoText.text = "Circuit: " + trackObj.trackName + "\tLength: " + (int)trackObj.CircuitLength + "\n" + trackObj.trackInfo;
+		trackInfoText.text = "Circuit: " + trackObj.trackName + "\t\tLength: " + (int)trackObj.CircuitLength + "\n" + trackObj.trackInfo;
 		addRacerDetailPanelScript.SetShadowModeCircuit(trackObj.trackName);
 	}
 
@@ -96,6 +103,8 @@ public class MenuSceneScript : MonoBehaviour
 		}
 
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
+		addRacerButton.gameObject.SetActive(!InOnlineRoom && addRacerButton.gameObject.activeSelf);
+		createOnlineRoomButton.gameObject.SetActive(racerDetailList.Count > 0);
 	}
 
 	public void DeleteRacerDetail(RacerDetailScript racerDetail)
@@ -107,6 +116,41 @@ public class MenuSceneScript : MonoBehaviour
 			racerDetail = null;
 		}
 		addRacerButton.gameObject.SetActive(racerDetailList.Count < racerCountLimit);
+		createOnlineRoomButton.gameObject.SetActive(racerDetailList.Count > 0);
+	}
+
+	bool InOnlineRoom = false;
+	public bool EnterOnlineRoom(string trackId, int lapCount)
+	{
+		InOnlineRoom = true;
+		for (int i = 1; i < racerDetailList.Count; i++)
+		{
+			DeleteRacerDetail(racerDetailList[i]);
+		}
+		addRacerButton.gameObject.SetActive(false);
+		for (int i = 0; i < trackPrefabs.Length; i++)
+		{
+			if (trackPrefabs[currentIndex].Id == trackId)
+			{
+				trackObj = Instantiate<WaypointCircuit>(trackPrefabs[currentIndex]);
+				trackInfoText.text = "Circuit: " + trackObj.trackName + "\t\tLength: " + (int)trackObj.CircuitLength + "\n" + trackObj.trackInfo;
+				addRacerDetailPanelScript.SetShadowModeCircuit(trackObj.trackName);
+				break;
+			}
+		}
+		totalLapCountInputField.text = lapCount.ToString();
+		totalLapCountInputField.enabled = false;
+
+		createOnlineRoomButton.gameObject.SetActive(false);
+		
+		return true;
+	}
+
+	public void LeaveOnlineRoom()
+	{
+		InOnlineRoom = false;
+		totalLapCountInputField.enabled = true;
+		createOnlineRoomButton.gameObject.SetActive(true);
 	}
 
 	public void StartButton()
